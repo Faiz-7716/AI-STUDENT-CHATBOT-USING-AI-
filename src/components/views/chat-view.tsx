@@ -90,7 +90,10 @@ export default function ChatView({ user }: ChatViewProps) {
     await addDoc(messagesRef, { ...userMessage, timestamp: serverTimestamp() });
 
     try {
-      const historyToPass = [...messages, userMessage];
+      const historyToPass = [...messages, userMessage].map(msg => ({
+        role: msg.role,
+        parts: msg.parts,
+      }));
       const aiResponse = await runAiTutor({
         question: currentInput,
         syllabus: syllabusContent,
