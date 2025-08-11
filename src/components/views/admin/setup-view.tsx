@@ -1,9 +1,10 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { collection, addDoc, getDocs, limit, query, setDoc, doc } from "firebase/firestore";
+import { collection, addDoc, getDocs, limit, query, setDoc, doc, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Settings, Users, Book } from "lucide-react";
 import { useState } from "react";
@@ -83,9 +84,16 @@ export default function AdminSetupView() {
         return;
       }
       
-      await Promise.all(initialStudents.map(student => addDoc(studentsRef, student)));
+      const batch = writeBatch(db);
+      initialStudents.forEach(student => {
+        const docRef = doc(studentsRef);
+        batch.set(docRef, student);
+      });
+      await batch.commit();
+
       toast({ title: "Success", description: `Successfully added ${initialStudents.length} students.` });
     } catch (error) {
+      console.error("Student upload error:", error);
       toast({ variant: "destructive", title: "Error", description: "An error occurred during student upload." });
     } finally {
       setIsUploadingStudents(false);
@@ -94,24 +102,20 @@ export default function AdminSetupView() {
 
   const handleBulkUploadSyllabus = async () => {
     setIsUploadingSyllabus(true);
-    if (!window.confirm("This will add the entire syllabus. This should only be done once. Proceed?")) {
+    if (!window.confirm("This will upload the entire syllabus. Any existing syllabus data will be overwritten. Proceed?")) {
       setIsUploadingSyllabus(false);
       return;
     }
     try {
-      const syllabusRef = collection(db, "syllabus");
-      const existingSnapshot = await getDocs(query(syllabusRef, limit(1)));
-      if(!existingSnapshot.empty) {
-        toast({ variant: "destructive", title: "Upload Failed", description: "Syllabus data already exists." });
-        setIsUploadingSyllabus(false);
-        return;
-      }
-      
-      await Promise.all(Object.entries(syllabusData).map(([semesterId, data]) => {
-          return setDoc(doc(db, "syllabus", semesterId), data);
-      }));
+      const batch = writeBatch(db);
+      Object.entries(syllabusData).forEach(([semesterId, data]) => {
+          const docRef = doc(db, "syllabus", semesterId);
+          batch.set(docRef, data);
+      });
+      await batch.commit();
       toast({ title: "Success", description: "Syllabus successfully uploaded!" });
     } catch (error) {
+      console.error("Syllabus upload error:", error);
       toast({ variant: "destructive", title: "Error", description: "An error occurred during syllabus upload." });
     } finally {
       setIsUploadingSyllabus(false);
@@ -140,7 +144,7 @@ export default function AdminSetupView() {
           <Card className="bg-muted/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg"><Book /> Bulk Upload Syllabus</CardTitle>
-              <CardDescription>Adds the complete 6-semester syllabus to the database from the predefined data.</CardDescription>
+              <CardDescription>Uploads the complete 6-semester syllabus to the database. This will overwrite existing data.</CardDescription>
             </CardHeader>
             <CardContent>
               <Button onClick={handleBulkUploadSyllabus} disabled={isUploadingSyllabus}>
