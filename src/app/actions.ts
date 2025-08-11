@@ -22,8 +22,8 @@ export async function runGenerateQuiz(input: GenerateQuizInput) {
 }
 
 export async function runStudyPlannerGenerator(input: StudyPlannerInput) {
-  const { studyPlan } = await studyPlannerGenerator(input);
-  return studyPlan;
+  const { dailyPlan } = await studyPlannerGenerator(input);
+  return dailyPlan;
 }
 
 export async function runExamStrategyGenerator(input: ExamStrategyInput) {
