@@ -118,18 +118,20 @@ export default function AdminSyllabusView() {
                 <Accordion type="single" collapsible className="w-full">
                     {Object.entries(syllabus).sort((a, b) => a[0].localeCompare(b[0])).map(([semesterName, courses]) => (
                         <AccordionItem key={semesterName} value={semesterName}>
-                            <AccordionTrigger className="text-lg font-semibold flex justify-between">
-                                {semesterName}
+                            <div className="flex items-center w-full">
+                                <AccordionTrigger className="text-lg font-semibold flex-1">
+                                    {semesterName}
+                                </AccordionTrigger>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="text-destructive mr-4" onClick={(e) => e.stopPropagation()}><Trash2 className="h-4 w-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="text-destructive mr-4"><Trash2 className="h-4 w-4"/></Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader><AlertDialogTitle>Delete {semesterName}?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the semester and all its courses. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
                                         <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteSemester(semesterName)}>Delete</AlertDialogAction></AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
-                            </AccordionTrigger>
+                            </div>
                             <AccordionContent className="p-2 space-y-4">
                                 {Object.keys(courses).length > 0 ? (
                                     Object.entries(courses).map(([courseCode, course]) => (
