@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, serverTimestamp, addDoc, doc, deleteDoc, updateDoc, setDoc, deleteField, writeBatch } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBN-is8pmnanluEx8zvHIdggFx12vx0SMs",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "ai-classroom-assistant-87aab.firebaseapp.com",
   projectId: "ai-classroom-assistant-87aab",
   storageBucket: "ai-classroom-assistant-87aab.appspot.com",
