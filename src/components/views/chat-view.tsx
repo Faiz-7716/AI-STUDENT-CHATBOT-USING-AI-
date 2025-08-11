@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { type User, type ChatMessage, type Syllabus, type Conversation } from "@/types";
 import { runAiTutor } from "@/app/actions";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, addDoc, query, orderBy, serverTimestamp, onSnapshot, limit, getDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, orderBy, serverTimestamp, onSnapshot, doc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,6 +28,7 @@ export default function ChatView({ user }: ChatViewProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,12 +62,16 @@ export default function ChatView({ user }: ChatViewProps) {
       const convos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Conversation[];
       setConversations(convos);
       setIsHistoryLoading(false);
+      // Automatically select the first conversation if none is active
       if (!activeConversationId && convos.length > 0) {
         setActiveConversationId(convos[0].id);
+      } else if (convos.length === 0) {
+        // If there are no conversations, clear the active one
+        setActiveConversationId(null);
       }
     });
     return () => unsubscribe();
-  }, [user.id, activeConversationId]);
+  }, [user.id]);
 
   useEffect(() => {
     if (!user.id || !activeConversationId) {
@@ -99,6 +104,12 @@ export default function ChatView({ user }: ChatViewProps) {
   const handleNewConversation = () => {
     setActiveConversationId(null);
     setMessages([]);
+    setIsSheetOpen(false);
+  }
+  
+  const handleSelectConversation = (id: string) => {
+    setActiveConversationId(id);
+    setIsSheetOpen(false);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,23 +121,23 @@ export default function ChatView({ user }: ChatViewProps) {
     setInput("");
 
     let currentConversationId = activeConversationId;
-    const isNewConversation = !currentConversationId;
-
-    if (isNewConversation) {
+    
+    // Create a new conversation if one isn't active
+    if (!currentConversationId) {
       const convoRef = await addDoc(collection(db, "students", user.id, "conversations"), {
         title: currentInput.substring(0, 40),
         timestamp: serverTimestamp()
       });
       currentConversationId = convoRef.id;
-      setActiveConversationId(currentConversationId);
+      setActiveConversationId(currentConversationId); // This will trigger the useEffect to fetch messages
     }
     
     const userMessage: ChatMessage = { role: "user", parts: [{ text: currentInput }] };
     const messagesRef = collection(db, "students", user.id, "conversations", currentConversationId!, "messages");
     await addDoc(messagesRef, { ...userMessage, timestamp: serverTimestamp() });
     
-    // If it's a new conversation, the messages array isn't populated yet, so we pass an empty history
-    const historyForAi = isNewConversation ? [] : messages;
+    // messages state might not be updated yet, so we get the history directly for the AI
+    const historyForAi = [...messages, userMessage];
 
     try {
       const historyToPass = historyForAi.map(msg => ({
@@ -145,6 +156,7 @@ export default function ChatView({ user }: ChatViewProps) {
       await addDoc(messagesRef, { ...assistantMessage, timestamp: serverTimestamp() });
 
     } catch (error) {
+      console.error("AI Tutor Error:", error);
       const errorMessage: ChatMessage = {
         role: "model",
         parts: [{ text: "Sorry, I encountered an error. Please try again." }],
@@ -159,7 +171,7 @@ export default function ChatView({ user }: ChatViewProps) {
     <div className="h-full flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-4xl h-full flex flex-col relative">
           <div className="absolute top-0 right-0 z-10">
-            <Sheet>
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
                         <PanelRightOpen className="h-5 w-5"/>
@@ -185,7 +197,7 @@ export default function ChatView({ user }: ChatViewProps) {
                                         key={convo.id} 
                                         variant={activeConversationId === convo.id ? "secondary" : "ghost"}
                                         className="w-full justify-start truncate"
-                                        onClick={() => setActiveConversationId(convo.id)}
+                                        onClick={() => handleSelectConversation(convo.id)}
                                     >
                                         {convo.title}
                                     </Button>
