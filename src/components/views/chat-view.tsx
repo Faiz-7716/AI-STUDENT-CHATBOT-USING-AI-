@@ -62,16 +62,14 @@ export default function ChatView({ user }: ChatViewProps) {
       const convos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Conversation[];
       setConversations(convos);
       setIsHistoryLoading(false);
-      // Automatically select the first conversation if none is active
+      // If no conversation is active and conversations exist, select the first one.
+      // This happens on initial load.
       if (!activeConversationId && convos.length > 0) {
         setActiveConversationId(convos[0].id);
-      } else if (convos.length === 0) {
-        // If there are no conversations, clear the active one
-        setActiveConversationId(null);
       }
     });
     return () => unsubscribe();
-  }, [user.id, activeConversationId]);
+  }, [user.id]);
 
   useEffect(() => {
     if (!user.id || !activeConversationId) {
