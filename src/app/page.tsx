@@ -13,11 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { BookOpen, GraduationCap } from "lucide-react";
 
 export default function LoginPage() {
-  const [isStudentLogin, setIsStudentLogin] = useState(true);
+  const [isStudentLogin, setIsStudentLogin] = useState(false);
   const [roll, setRoll] = useState("");
   const [code, setCode] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("pmdfaiz08@gmail.com");
+  const [password, setPassword] = useState("Faiz@2005");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
