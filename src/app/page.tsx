@@ -16,8 +16,8 @@ export default function LoginPage() {
   const [isStudentLogin, setIsStudentLogin] = useState(true);
   const [roll, setRoll] = useState("");
   const [code, setCode] = useState("");
-  const [email, setEmail] = useState("pmdfaiz08@gmail.com");
-  const [password, setPassword] = useState("Faiz@2005");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -61,15 +61,13 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // You might want to have a separate 'admins' collection or a role field in your user documents
-      // For now, we'll just assume a successful login is an admin login.
       const adminUser = { uid: user.uid, email: user.email, name: "Admin", isAdmin: true };
       sessionStorage.setItem("user", JSON.stringify(adminUser));
       toast({ title: "Admin Login Successful", description: "Welcome, Admin!" });
       router.push("/dashboard");
 
     } catch (error) {
-       toast({ variant: "destructive", title: "Login Failed", description: "Invalid credentials." });
+       toast({ variant: "destructive", title: "Login Failed", description: "Invalid credentials. Please ensure you have created an admin user in Firebase Authentication." });
     }
     setIsLoading(false);
   };
@@ -142,6 +140,7 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
