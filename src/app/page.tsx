@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BookOpen, GraduationCap } from "lucide-react";
 
 export default function LoginPage() {
-  const [isStudentLogin, setIsStudentLogin] = useState(false);
+  const [isStudentLogin, setIsStudentLogin] = useState(true);
   const [roll, setRoll] = useState("");
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("pmdfaiz08@gmail.com");
@@ -57,14 +57,19 @@ export default function LoginPage() {
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Bypass Firebase Auth for now and check credentials directly
-    if (email === "pmdfaiz08@gmail.com" && password === "Faiz@2005") {
-      const user = { uid: "admin-user", email: email, name: "Admin", isAdmin: true };
-      sessionStorage.setItem("user", JSON.stringify(user));
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // You might want to have a separate 'admins' collection or a role field in your user documents
+      // For now, we'll just assume a successful login is an admin login.
+      const adminUser = { uid: user.uid, email: user.email, name: "Admin", isAdmin: true };
+      sessionStorage.setItem("user", JSON.stringify(adminUser));
       toast({ title: "Admin Login Successful", description: "Welcome, Admin!" });
       router.push("/dashboard");
-    } else {
-      toast({ variant: "destructive", title: "Login Failed", description: "Invalid credentials." });
+
+    } catch (error) {
+       toast({ variant: "destructive", title: "Login Failed", description: "Invalid credentials." });
     }
     setIsLoading(false);
   };

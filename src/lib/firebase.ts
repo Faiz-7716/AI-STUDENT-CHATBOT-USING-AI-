@@ -3,15 +3,15 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, serverTimestamp, addDoc, doc, deleteDoc, updateDoc } from "firebase/firestore";
 
 const firebaseConfig = {
-  // TODO: PASTE YOUR FIREBASE CONFIG OBJECT HERE
-  // You can find this in your Firebase project settings.
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBN-is8pmnanluEx8zvHIdggFx12vx0SMs",
+  authDomain: "ai-classroom-assistant-87aab.firebaseapp.com",
+  projectId: "ai-classroom-assistant-87aab",
+  storageBucket: "ai-classroom-assistant-87aab.appspot.com",
+  messagingSenderId: "161164248537",
+  appId: "1:161164248537:web:11b7d9d912828e31e845c8",
+  measurementId: "G-5N6EGGP8X9"
 };
+
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
