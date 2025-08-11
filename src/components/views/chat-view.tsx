@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { type User, type ChatMessage, type Syllabus } from "@/types";
 import { runAiTutor } from "@/app/actions";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, addDoc, query, orderBy, serverTimestamp, onSnapshot, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, orderBy, serverTimestamp, onSnapshot } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -81,25 +81,30 @@ export default function ChatView({ user }: ChatViewProps) {
     if (!input.trim() || isLoading || !syllabusContent || !user.id) return;
     
     setIsLoading(true);
-    const userMessage: ChatMessage = { role: "user", parts: [{ text: input }] };
     const currentInput = input;
     setInput("");
 
+    const userMessage: ChatMessage = { role: "user", parts: [{ text: currentInput }] };
+    
     // Save user message to Firestore
     const messagesRef = collection(db, "students", user.id, "chatHistory");
     await addDoc(messagesRef, { ...userMessage, timestamp: serverTimestamp() });
 
     try {
+      // The `onSnapshot` listener will update the `messages` state with the new user message.
+      // We pass the new, complete history to the AI.
       const historyToPass = [...messages, userMessage].map(msg => ({
         role: msg.role,
         parts: msg.parts,
       }));
+
       const aiResponse = await runAiTutor({
         question: currentInput,
         syllabus: syllabusContent,
         studentName: user.name,
         history: historyToPass,
       });
+
       const assistantMessage: ChatMessage = { role: "model", parts: [{ text: aiResponse }] };
       // Save model response to Firestore
       await addDoc(messagesRef, { ...assistantMessage, timestamp: serverTimestamp() });
