@@ -143,7 +143,7 @@ export function Dashboard() {
             <div className="flex items-center gap-3">
               <GraduationCap className="w-8 h-8 text-primary" />
               <div className="group-data-[collapsible=icon]:hidden">
-                <h2 className="font-bold text-lg">TutorAI</h2>
+                <h2 className="font-bold text-lg">FAIZAI</h2>
                 <p className="text-xs text-muted-foreground">B.Sc. CS Assistant</p>
               </div>
             </div>

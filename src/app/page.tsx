@@ -81,7 +81,7 @@ export default function LoginPage() {
     )}>
       <div className="text-center mb-8">
         <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-          TutorAI
+          FAIZAI
         </h1>
         <p className="text-muted-foreground mt-2 text-base sm:text-lg">Your Personal AI Classroom Assistant</p>
       </div>

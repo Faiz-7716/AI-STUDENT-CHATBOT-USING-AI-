@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'TutorAI: AI Classroom Assistant',
+  title: 'FAIZAI: AI Classroom Assistant',
   description: 'An AI-powered classroom assistant for B.Sc. Computer Science students.',
 };
 
