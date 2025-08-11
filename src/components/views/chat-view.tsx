@@ -62,13 +62,9 @@ export default function ChatView({ user }: ChatViewProps) {
       const convos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Conversation[];
       setConversations(convos);
       setIsHistoryLoading(false);
-      // This logic was faulty, removing it to allow new chats.
-      // if (!activeConversationId && convos.length > 0) {
-      //   setActiveConversationId(convos[0].id);
-      // }
     });
     return () => unsubscribe();
-  }, [user.id, activeConversationId]);
+  }, [user.id]);
 
   useEffect(() => {
     if (!user.id || !activeConversationId) {
@@ -126,18 +122,17 @@ export default function ChatView({ user }: ChatViewProps) {
         timestamp: serverTimestamp()
       });
       currentConversationId = convoRef.id;
-      setActiveConversationId(currentConversationId); // This will trigger the useEffect to fetch messages
+      setActiveConversationId(currentConversationId);
     }
     
     const userMessage: ChatMessage = { role: "user", parts: [{ text: currentInput }] };
     const messagesRef = collection(db, "students", user.id, "conversations", currentConversationId!, "messages");
     await addDoc(messagesRef, { ...userMessage, timestamp: serverTimestamp() });
     
-    // messages state might not be updated yet, so we get the history directly for the AI
-    const historyForAi = [...messages, userMessage];
+    const currentMessages = [...messages, userMessage];
 
     try {
-      const historyToPass = historyForAi.map(msg => ({
+      const historyToPass = currentMessages.map(msg => ({
         role: msg.role,
         parts: msg.parts.map(p => ({text: p.text})),
       }));
@@ -166,47 +161,47 @@ export default function ChatView({ user }: ChatViewProps) {
 
   return (
     <div className="h-full flex flex-col p-4">
-      <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col relative">
-          <div className="absolute top-0 right-0 z-10">
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                        <PanelRightOpen className="h-5 w-5"/>
-                        <span className="sr-only">Toggle Conversations History</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent className="w-[300px] sm:w-[400px] flex flex-col p-0">
-                    <SheetHeader className="p-4 border-b">
-                        <SheetTitle className="flex items-center gap-2"><History className="h-5 w-5"/> Conversations</SheetTitle>
-                    </SheetHeader>
-                    <div className="p-2">
-                        <Button variant="outline" className="w-full" onClick={handleNewConversation}>
-                        <MessageSquarePlus className="mr-2 h-4 w-4"/> New Chat
-                        </Button>
-                    </div>
-                    <ScrollArea className="flex-1">
-                        <div className="px-2 pb-2 space-y-1">
-                            {isHistoryLoading ? (
-                                Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-10 w-full"/>)
-                            ) : (
-                                conversations.map(convo => (
-                                    <Button 
-                                        key={convo.id} 
-                                        variant={activeConversationId === convo.id ? "secondary" : "ghost"}
-                                        className="w-full justify-start truncate"
-                                        onClick={() => handleSelectConversation(convo.id)}
-                                    >
-                                        {convo.title}
-                                    </Button>
-                                ))
-                            )}
-                        </div>
-                    </ScrollArea>
-                </SheetContent>
-            </Sheet>
-          </div>
-        <ScrollArea className="flex-1 mb-4 pr-4" ref={scrollAreaRef}>
-          <div className="space-y-6">
+      <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col relative overflow-hidden">
+        <div className="absolute top-0 right-0 z-10">
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                      <PanelRightOpen className="h-5 w-5"/>
+                      <span className="sr-only">Toggle Conversations History</span>
+                  </Button>
+              </SheetTrigger>
+              <SheetContent className="w-[300px] sm:w-[400px] flex flex-col p-0">
+                  <SheetHeader className="p-4 border-b">
+                      <SheetTitle className="flex items-center gap-2"><History className="h-5 w-5"/> Conversations</SheetTitle>
+                  </SheetHeader>
+                  <div className="p-2">
+                      <Button variant="outline" className="w-full" onClick={handleNewConversation}>
+                      <MessageSquarePlus className="mr-2 h-4 w-4"/> New Chat
+                      </Button>
+                  </div>
+                  <ScrollArea className="flex-1">
+                      <div className="px-2 pb-2 space-y-1">
+                          {isHistoryLoading ? (
+                              Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-10 w-full"/>)
+                          ) : (
+                              conversations.map(convo => (
+                                  <Button 
+                                      key={convo.id} 
+                                      variant={activeConversationId === convo.id ? "secondary" : "ghost"}
+                                      className="w-full justify-start truncate"
+                                      onClick={() => handleSelectConversation(convo.id)}
+                                  >
+                                      {convo.title}
+                                  </Button>
+                              ))
+                          )}
+                      </div>
+                  </ScrollArea>
+              </SheetContent>
+          </Sheet>
+        </div>
+        <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
+          <div className="space-y-6 pb-4">
             {messages.length === 0 && !isLoading && (
               <div className="flex flex-col items-center text-center mt-16">
                 <div className="p-4 bg-primary/10 rounded-full">
@@ -251,7 +246,7 @@ export default function ChatView({ user }: ChatViewProps) {
             )}
           </div>
         </ScrollArea>
-        <div className="w-full max-w-4xl mx-auto">
+        <div className="mt-auto">
           <Card className="p-2 rounded-xl shadow-lg">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <Input
