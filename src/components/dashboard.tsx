@@ -7,7 +7,7 @@ import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter,
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LogOut, Settings, Users, Bell, FileText, Award, BookOpen, MessageCircle, Book, Target, Terminal, Calendar, HelpCircle, GraduationCap, KeyRound } from "lucide-react";
+import { LogOut, Settings, Users, Bell, FileText, Award, BookOpen, MessageCircle, Book, Target, Terminal, Calendar, HelpCircle, GraduationCap, KeyRound, BookCopy } from "lucide-react";
 import { collection, onSnapshot, query, where, Timestamp, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -28,6 +28,7 @@ import AdminNotesView from "@/components/views/admin/notes-view";
 import AdminNaanView from "@/components/views/admin/naan-view";
 import AdminExtraCoursesView from "@/components/views/admin/extra-courses-view";
 import AdminAccessCodesView from "@/components/views/admin/access-codes-view";
+import AdminSyllabusView from "@/components/views/admin/syllabus-view";
 
 const studentViews: { [key: string]: React.ComponentType<any> } = {
   chat: ChatView,
@@ -47,6 +48,7 @@ const adminViews: { [key: string]: React.ComponentType<any> } = {
   'admin-students': AdminStudentsView,
   'admin-notifications': AdminNotificationsView,
   'admin-notes': AdminNotesView,
+  'admin-syllabus': AdminSyllabusView,
   'admin-naan': AdminNaanView,
   'admin-extra': AdminExtraCoursesView,
   'admin-access-codes': AdminAccessCodesView,
@@ -70,6 +72,7 @@ const adminMenuItems = [
   { key: 'admin-students', label: 'Students', icon: Users },
   { key: 'admin-notifications', label: 'Notifications', icon: Bell },
   { key: 'admin-notes', label: 'Notes', icon: FileText },
+  { key: 'admin-syllabus', label: 'Syllabus', icon: BookCopy },
   { key: 'admin-naan', label: 'Naan Mudhalvan', icon: Award },
   { key: 'admin-extra', label: 'Extra Courses', icon: BookOpen },
   { key: 'admin-access-codes', label: 'Access Codes', icon: KeyRound },
