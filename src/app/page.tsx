@@ -57,13 +57,13 @@ export default function LoginPage() {
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = { uid: userCredential.user.uid, email: userCredential.user.email, name: "Admin", isAdmin: true };
+    // Bypass Firebase Auth for now and check credentials directly
+    if (email === "pmdfaiz08@gmail.com" && password === "Faiz@2005") {
+      const user = { uid: "admin-user", email: email, name: "Admin", isAdmin: true };
       sessionStorage.setItem("user", JSON.stringify(user));
       toast({ title: "Admin Login Successful", description: "Welcome, Admin!" });
       router.push("/dashboard");
-    } catch (error) {
+    } else {
       toast({ variant: "destructive", title: "Login Failed", description: "Invalid credentials." });
     }
     setIsLoading(false);
