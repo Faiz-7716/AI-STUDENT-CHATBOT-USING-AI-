@@ -42,35 +42,39 @@ const syllabusData = {
     },
     "Semester 3": {
         "CC5": { "title": "Python Programming", "units": ["Unit 1: Python Basics & Arrays", "Unit 2: Control Statements", "Unit 3: Functions & Modules", "Unit 4: Lists, Tuples, Dictionaries", "Unit 5: File Handling"] },
-        "CC6": { "title": "Python Lab", "exercises": ["Variables & Operators", "Loops", "Functions", "Recursion", "Arrays", "Strings", "Lists, Tuples, Dictionaries", "File Handling"] },
-        "EC3": { "title": "Elective 3", "options": ["Statistical Methods I", "Physics-I"] },
-        "SEC-4": { "title": "Fundamentals of IT", "units": ["Unit 1: Intro to Computers", "Unit 2: I/O Devices", "Unit 3: Storage", "Unit 4: Software", "Unit 5: Operating Systems"] },
-        "SEC-5": { "title": "Understanding Internet", "units": ["Unit 1: Internet Basics", "Unit 2: TCP/IP", "Unit 3: Internet Connectivity", "Unit 4: Networks", "Unit 5: Email Protocols"] }
+        "CC6": { "title": "Python Programming Lab", "exercises": ["Variables & Operators", "Loops", "Functions", "Recursion", "Arrays", "Strings", "Lists, Tuples, Dictionaries", "File Handling"] },
+        "EC3": { "title": "Elective 3", "options": ["Statistical Methods and their Applications – I", "Physics-I"] },
+        "SEC-4": { "title": "Fundamentals of Information Technology", "units": ["Unit 1: Intro to Computers", "Unit 2: I/O Devices", "Unit 3: Storage", "Unit 4: Software", "Unit 5: Operating Systems"] },
+        "SEC-5": { "title": "Understanding Internet", "units": ["Unit 1: Internet Basics", "Unit 2: TCP/IP", "Unit 3: Internet Connectivity", "Unit 4: Networks", "Unit 5: Email Protocols"] },
+        "EVS": { "title": "Environmental Studies", "category": "Part-4" }
     },
     "Semester 4": {
         "CC7": { "title": "Java Programming", "units": ["Unit 1: Intro to Java & OOP", "Unit 2: Inheritance & Packages", "Unit 3: Multithreading & I/O", "Unit 4: AWT & Event Handling", "Unit 5: Swing"] },
-        "CC8": { "title": "Java Lab", "exercises": ["Prime Numbers", "Matrix Multiplication", "String Manipulation", "Multithreading", "Exception Handling", "File I/O", "AWT Calculator", "Swing Traffic Light"] },
-        "EC4": { "title": "Elective 4", "options": ["Statistical Methods II", "Physics-II"] },
+        "CC8": { "title": "Java Programming Lab", "exercises": ["Prime Numbers", "Matrix Multiplication", "String Manipulation", "Multithreading", "Exception Handling", "File I/O", "AWT Calculator", "Swing Traffic Light"] },
+        "EC4": { "title": "Elective 4", "options": ["Statistical Methods and their Applications – II", "Physics-II"] },
         "SEC-6": { "title": "Web Designing", "units": ["Unit 1: HTML Basics", "Unit 2: Forms & Graphics", "Unit 3: CSS & XML", "Unit 4: DHTML", "Unit 5: JavaScript"] },
         "SEC-7": { "title": "Cyber Forensics", "units": ["Unit 1: Intro to Forensics", "Unit 2: Evidence Capture", "Unit 3: Evidence Preservation", "Unit 4: Analysis", "Unit 5: Reconstruction"] }
     },
     "Semester 5": {
-        "CC9": { "title": "Operating Systems", "units": ["Unit 1: Intro & Processes", "Unit 2: Concurrency & Semaphores", "Unit 3: Deadlock", "Unit 4: Scheduling", "Unit 5: Memory Management"] },
-        "CC10": { "title": "OS Lab", "exercises": ["Shell Programming", "Scheduling Algorithms", "File Allocation", "Semaphores", "Banker's Algorithm", "Page Replacement"] },
-        "CC11": { "title": "DBMS", "units": ["Unit 1: Database Concepts", "Unit 2: Relational Model & ER", "Unit 3: Normalization & SQL", "Unit 4: Advanced SQL", "Unit 5: PL/SQL"] },
-        "CC12": { "title": "DBMS Lab", "exercises": ["DDL, DML, TCL", "PL/SQL Basics", "Triggers", "Cursors", "Library Mgmt App"] },
-        "CC13": { "title": "Project with Viva voce" },
-        "EC5": { "title": "Elective 5", "options": ["Data Science", "AI", "Computer Networks"] },
-        "EC6": { "title": "Elective 6", "options": ["Data Mining", "Mobile Computing", "NLP"] }
+        "CC9": { "title": "Operating System", "units": ["Unit 1: Intro & Processes", "Unit 2: Concurrency & Semaphores", "Unit 3: Deadlock", "Unit 4: Scheduling", "Unit 5: Memory Management"] },
+        "CC10": { "title": "Operating System Lab", "exercises": ["Shell Programming", "Scheduling Algorithms", "File Allocation", "Semaphores", "Banker's Algorithm", "Page Replacement"] },
+        "CC11": { "title": "Data Base Management System", "units": ["Unit 1: Database Concepts", "Unit 2: Relational Model & ER", "Unit 3: Normalization & SQL", "Unit 4: Advanced SQL", "Unit 5: PL/SQL"] },
+        "CC12": { "title": "Practical: Data Base Management System Lab", "exercises": ["DDL, DML, TCL", "PL/SQL Basics", "Triggers", "Cursors", "Library Mgmt App"] },
+        "CC13": { "title": "Project with Viva voce", "category": "Core" },
+        "EC5": { "title": "Elective 5", "options": ["Introduction to Data Science", "Artificial Intelligence", "Computer Networks"] },
+        "EC6": { "title": "Elective 6", "options": ["Data Mining and warehousing", "Mobile Computing", "Natural Language Processing"] },
+        "VE": { "title": "Value Education", "category": "Part-4" },
+        "Internship": { "title": "Internship / Industrial Training", "category": "Part-4" }
     },
     "Semester 6": {
-        "CC14": { "title": "Machine Learning" },
-        "CC15": { "title": "Machine Learning Lab" },
-        "CC16": { "title": "Data Analytics using R" },
-        "CC17": { "title": "R Lab" },
-        "EC7": { "title": "Elective 7", "options": ["IoT", "Cloud Computing", "SPM"] },
-        "EC8": { "title": "Elective 8", "options": ["Software Testing", "Cryptography", "Robotics"] },
-        "SEC-8": { "title": "Open Source Tech" }
+        "CC14": { "title": "Machine Learning", "category": "Core" },
+        "CC15": { "title": "Machine Learning Lab", "category": "Core Practical" },
+        "CC16": { "title": "Data Analytics using R programming", "category": "Core" },
+        "CC17": { "title": "Practical: Data Analytics using R programming Lab", "category": "Core Practical" },
+        "EC7": { "title": "Elective 7", "options": ["IOT and its Applications", "Cloud Computing", "Software Project Management"] },
+        "EC8": { "title": "Elective 8", "options": ["Software Testing", "Cryptography", "Robotics and its Applications"] },
+        "SEC-8": { "title": "Open Source Technology", "category": "Skill Enhancement" },
+        "EA": { "title": "Extension Activity", "category": "Part-5" }
     }
 };
 
@@ -188,5 +192,3 @@ export default function AdminSetupView() {
     </div>
   );
 }
-
-    
