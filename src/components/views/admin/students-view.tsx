@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2 } from "lucide-react";
+import { Trash2, KeyRound } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,7 +51,7 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export default function AdminStudentsView() {
+export default function AdminStudentsView({ setView }: { setView: (view: string) => void }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [newRoll, setNewRoll] = useState("");
   const [newName, setNewName] = useState("");
@@ -121,9 +121,12 @@ export default function AdminStudentsView() {
       </Card>
       
       <Card>
-        <CardHeader>
-          <CardTitle>Student List</CardTitle>
-          <CardDescription>A list of all students currently in the system.</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Student List</CardTitle>
+            <CardDescription>A list of all students currently in the system.</CardDescription>
+          </div>
+          <Button variant="outline" onClick={() => setView('admin-access-codes')}><KeyRound className="mr-2 h-4 w-4" /> View All Access Codes</Button>
         </CardHeader>
         <CardContent>
           <Table>

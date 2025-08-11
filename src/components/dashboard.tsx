@@ -7,7 +7,7 @@ import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter,
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LogOut, Settings, Users, Bell, FileText, Award, BookOpen, MessageCircle, Book, Target, Terminal, Calendar, HelpCircle, GraduationCap } from "lucide-react";
+import { LogOut, Settings, Users, Bell, FileText, Award, BookOpen, MessageCircle, Book, Target, Terminal, Calendar, HelpCircle, GraduationCap, KeyRound } from "lucide-react";
 
 import ChatView from "@/components/views/chat-view";
 import NotificationsView from "@/components/views/notifications-view";
@@ -25,6 +25,7 @@ import AdminNotificationsView from "@/components/views/admin/notifications-view"
 import AdminNotesView from "@/components/views/admin/notes-view";
 import AdminNaanView from "@/components/views/admin/naan-view";
 import AdminExtraCoursesView from "@/components/views/admin/extra-courses-view";
+import AdminAccessCodesView from "@/components/views/admin/access-codes-view";
 
 const studentViews: { [key: string]: React.ComponentType<any> } = {
   chat: ChatView,
@@ -46,6 +47,7 @@ const adminViews: { [key: string]: React.ComponentType<any> } = {
   'admin-notes': AdminNotesView,
   'admin-naan': AdminNaanView,
   'admin-extra': AdminExtraCoursesView,
+  'admin-access-codes': AdminAccessCodesView,
 };
 
 const studentMenuItems = [
@@ -68,6 +70,7 @@ const adminMenuItems = [
   { key: 'admin-notes', label: 'Notes', icon: FileText },
   { key: 'admin-naan', label: 'Naan Mudhalvan', icon: Award },
   { key: 'admin-extra', label: 'Extra Courses', icon: BookOpen },
+  { key: 'admin-access-codes', label: 'Access Codes', icon: KeyRound },
 ];
 
 export function Dashboard() {
@@ -159,7 +162,7 @@ export function Dashboard() {
             </div>
           </header>
           <div className="flex-1 overflow-y-auto bg-muted/20">
-            {CurrentView && <CurrentView user={user} />}
+            {CurrentView && <CurrentView user={user} setView={setView} />}
           </div>
         </main>
       </div>
