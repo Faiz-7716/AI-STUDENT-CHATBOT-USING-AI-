@@ -6,13 +6,13 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { type Syllabus, type User } from "@/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { runAiTutor } from "@/app/actions";
 import { Bot, Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogDescriptionComponent } from "@/components/ui/dialog";
 
 export default function SyllabusBrowserView({ user }: { user: User }) {
   const [syllabus, setSyllabus] = useState<Syllabus | null>(null);
@@ -76,9 +76,9 @@ export default function SyllabusBrowserView({ user }: { user: User }) {
         <DialogContent className="sm:max-w-[625px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Bot /> AI Explanation</DialogTitle>
-            <DialogDescription>
+            <DialogDescriptionComponent>
               Here is a brief explanation of the selected topic.
-            </DialogDescription>
+            </DialogDescriptionComponent>
           </DialogHeader>
           <div className="prose dark:prose-invert max-h-[60vh] overflow-y-auto pr-2">
             {isAiLoading ? <Loader2 className="animate-spin h-8 w-8 mx-auto"/> : <div dangerouslySetInnerHTML={{ __html: aiResponse.replace(/\n/g, '<br />') }} />}
