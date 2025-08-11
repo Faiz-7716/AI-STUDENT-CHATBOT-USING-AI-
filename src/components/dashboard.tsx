@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { type User } from "@/types";
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, SidebarMenuBadge } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LogOut, Settings, Users, Bell, FileText, Award, BookOpen, MessageCircle, Book, Target, Terminal, Calendar, HelpCircle, GraduationCap, KeyRound } from "lucide-react";
+import { collection, onSnapshot, query, where, Timestamp, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import ChatView from "@/components/views/chat-view";
 import NotificationsView from "@/components/views/notifications-view";
@@ -76,6 +78,7 @@ const adminMenuItems = [
 export function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [view, setView] = useState("");
+  const [notificationCount, setNotificationCount] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -89,8 +92,36 @@ export function Dashboard() {
     }
   }, [router]);
 
+  useEffect(() => {
+    if (user && !user.isAdmin) {
+      const lastCheckedStr = sessionStorage.getItem('lastCheckedNotifications');
+      const lastChecked = lastCheckedStr ? new Date(lastCheckedStr) : new Date(0);
+
+      const q = query(
+        collection(db, "notifications"),
+        where("timestamp", ">", Timestamp.fromDate(lastChecked)),
+        orderBy("timestamp", "desc")
+      );
+
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        setNotificationCount(querySnapshot.size);
+      });
+
+      return () => unsubscribe();
+    }
+  }, [user]);
+
+  const handleSetView = (newView: string) => {
+    if (newView === 'notifications') {
+      sessionStorage.setItem('lastCheckedNotifications', new Date().toISOString());
+      setNotificationCount(0);
+    }
+    setView(newView);
+  }
+
   const handleLogout = () => {
     sessionStorage.removeItem("user");
+    sessionStorage.removeItem("lastCheckedNotifications");
     router.push("/");
   };
 
@@ -122,12 +153,15 @@ export function Dashboard() {
               {menuItems.map(item => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
-                    onClick={() => setView(item.key)}
+                    onClick={() => handleSetView(item.key)}
                     isActive={view === item.key}
                     tooltip={item.label}
                   >
                     <item.icon className="w-5 h-5" />
                     <span>{item.label}</span>
+                     {item.key === 'notifications' && notificationCount > 0 && (
+                        <SidebarMenuBadge>{notificationCount}</SidebarMenuBadge>
+                     )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
