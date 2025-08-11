@@ -59,11 +59,7 @@ Syllabus Content: {{{syllabus}}}
 {{#if history}}
 Conversation History:
 {{#each history}}
-  {{#if (eq this.role "user")}}
-    Student: {{#each this.parts}}{{{this.text}}}{{/each}}
-  {{else}}
-    Assistant: {{#each this.parts}}{{{this.text}}}{{/each}}
-  {{/if}}
+  {{this.role}}: {{#each this.parts}}{{{this.text}}}{{/each}}
 {{/each}}
 {{/if}}
 
@@ -78,7 +74,13 @@ const aiTutorFlow = ai.defineFlow(
     outputSchema: AiTutorOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    // To make the prompt simpler, we'll replace 'model' with 'Assistant' and 'user' with 'Student'
+    const processedHistory = input.history.map(msg => ({
+        ...msg,
+        role: msg.role === 'model' ? 'Assistant' : 'Student'
+    })) as any;
+
+    const {output} = await prompt({...input, history: processedHistory});
     return output!;
   }
 );

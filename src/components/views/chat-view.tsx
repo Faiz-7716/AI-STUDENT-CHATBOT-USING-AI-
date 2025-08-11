@@ -110,8 +110,9 @@ export default function ChatView({ user }: ChatViewProps) {
     setInput("");
 
     let currentConversationId = activeConversationId;
+    const isNewConversation = !currentConversationId;
 
-    if (!currentConversationId) {
+    if (isNewConversation) {
       const convoRef = await addDoc(collection(db, "students", user.id, "conversations"), {
         title: currentInput.substring(0, 40),
         timestamp: serverTimestamp()
@@ -121,11 +122,14 @@ export default function ChatView({ user }: ChatViewProps) {
     }
     
     const userMessage: ChatMessage = { role: "user", parts: [{ text: currentInput }] };
-    const messagesRef = collection(db, "students", user.id, "conversations", currentConversationId, "messages");
+    const messagesRef = collection(db, "students", user.id, "conversations", currentConversationId!, "messages");
     await addDoc(messagesRef, { ...userMessage, timestamp: serverTimestamp() });
     
+    // If it's a new conversation, the messages array isn't populated yet, so we pass an empty history
+    const historyForAi = isNewConversation ? [] : messages;
+
     try {
-      const historyToPass = [...messages, userMessage].map(msg => ({
+      const historyToPass = historyForAi.map(msg => ({
         role: msg.role,
         parts: msg.parts.map(p => ({text: p.text})),
       }));
@@ -162,15 +166,17 @@ export default function ChatView({ user }: ChatViewProps) {
                         <span className="sr-only">Toggle Conversations History</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent className="w-[300px] sm:w-[400px] flex flex-col">
-                    <SheetHeader>
+                <SheetContent className="w-[300px] sm:w-[400px] flex flex-col p-0">
+                    <SheetHeader className="p-4 border-b">
                         <SheetTitle className="flex items-center gap-2"><History className="h-5 w-5"/> Conversations</SheetTitle>
                     </SheetHeader>
-                    <Button variant="outline" className="w-full" onClick={handleNewConversation}>
-                       <MessageSquarePlus className="mr-2 h-4 w-4"/> New Chat
-                    </Button>
-                    <ScrollArea className="flex-1 -mx-6">
-                        <div className="px-6 py-2 space-y-1">
+                    <div className="p-2">
+                        <Button variant="outline" className="w-full" onClick={handleNewConversation}>
+                        <MessageSquarePlus className="mr-2 h-4 w-4"/> New Chat
+                        </Button>
+                    </div>
+                    <ScrollArea className="flex-1">
+                        <div className="px-2 pb-2 space-y-1">
                             {isHistoryLoading ? (
                                 Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-10 w-full"/>)
                             ) : (
