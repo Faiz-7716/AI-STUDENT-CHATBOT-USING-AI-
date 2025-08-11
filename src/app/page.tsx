@@ -12,16 +12,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [isStudentLogin, setIsStudentLogin] = useState(true);
   const [roll, setRoll] = useState("");
   const [code, setCode] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [isCodeVisible, setIsCodeVisible] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+
+  const toggleCodeVisibility = () => setIsCodeVisible(!isCodeVisible);
+  const togglePasswordVisibility = () => setIsPasswordVisible(!isPasswordVisible);
 
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,17 +116,21 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label htmlFor="code">Access Code</Label>
                 <Input
                   id="code"
-                  type="password"
+                  type={isCodeVisible ? "text" : "password"}
                   placeholder="e.g., CS25-701-XX"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   disabled={isLoading}
                   required
+                  className="pr-10"
                 />
+                 <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-7 h-7 w-7" onClick={toggleCodeVisibility} disabled={isLoading}>
+                    {isCodeVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
@@ -140,17 +150,21 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
-                  type="password"
+                  type={isPasswordVisible ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
                   required
+                  className="pr-10"
                 />
+                <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-7 h-7 w-7" onClick={togglePasswordVisibility} disabled={isLoading}>
+                    {isPasswordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
