@@ -71,7 +71,7 @@ export default function ChatView({ user }: ChatViewProps) {
       }
     });
     return () => unsubscribe();
-  }, [user.id]);
+  }, [user.id, activeConversationId]);
 
   useEffect(() => {
     if (!user.id || !activeConversationId) {
