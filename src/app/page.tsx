@@ -111,7 +111,7 @@ export default function LoginPage() {
                 <Input
                   id="code"
                   type="password"
-                  placeholder="e.g., Your unique code"
+                  placeholder="e.g., CS25-701-XX"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   disabled={isLoading}
@@ -158,6 +158,9 @@ export default function LoginPage() {
           </Button>
         </CardContent>
       </Card>
+      <div className="mt-8 text-center text-sm text-muted-foreground">
+        <p>Developed by MOHAMMED FAIZ and AI</p>
+      </div>
     </main>
   );
 }
