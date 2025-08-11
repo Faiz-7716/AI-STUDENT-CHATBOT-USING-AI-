@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview An AI-powered tutor flow that answers student questions based on a syllabus.
+ * @fileOverview An AI-powered tutor flow that answers student questions based on a syllabus and conversation history.
  *
  * - aiTutor - A function that handles the tutoring process.
  * - AiTutorInput - The input type for the aiTutor function.
@@ -10,16 +10,25 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {ChatMessage} from '@/types';
+
+const ChatMessageSchema = z.object({
+  role: z.enum(['user', 'model']),
+  parts: z.array(z.object({text: z.string()})),
+});
 
 const AiTutorInputSchema = z.object({
-  question: z.string().describe("The student's question."),
+  question: z.string().describe("The student's current question."),
   syllabus: z.string().describe('The syllabus content.'),
   studentName: z.string().describe('The name of the student.'),
+  history: z.array(ChatMessageSchema).describe('The conversation history.'),
 });
 export type AiTutorInput = z.infer<typeof AiTutorInputSchema>;
 
 const AiTutorOutputSchema = z.object({
-  answer: z.string().describe("The AI-generated answer to the student's question."),
+  answer: z
+    .string()
+    .describe("The AI-generated answer to the student's question."),
 });
 export type AiTutorOutput = z.infer<typeof AiTutorOutputSchema>;
 
@@ -46,6 +55,18 @@ General Guidelines:
 Based on these guidelines, answer the student's question.
 
 Syllabus Content: {{{syllabus}}}
+
+{{#if history}}
+Conversation History:
+{{#each history}}
+  {{#if (eq this.role "user")}}
+    Student: {{{this.parts.0.text}}}
+  {{else}}
+    Assistant: {{{this.parts.0.text}}}
+  {{/if}}
+{{/each}}
+{{/if}}
+
 Student Question: {{{question}}}
   `,
 });

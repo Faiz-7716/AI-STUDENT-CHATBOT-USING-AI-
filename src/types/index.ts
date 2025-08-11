@@ -4,6 +4,7 @@ export interface User {
   uid: string;
   name: string;
   email?: string;
+  phone?: string;
   roll?: string;
   code?: string;
   isAdmin: boolean;
@@ -14,6 +15,8 @@ export interface Student {
   roll: string;
   name: string;
   code: string;
+  email?: string;
+  phone?: string;
 }
 
 export interface Notification {
@@ -37,7 +40,7 @@ export interface NaanCourse {
 }
 
 export interface ExtraCourse {
-  id: string;
+  id:string;
   title: string;
   description: string;
   link: string;

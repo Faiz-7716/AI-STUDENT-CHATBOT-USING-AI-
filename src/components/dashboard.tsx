@@ -7,7 +7,7 @@ import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter,
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LogOut, Settings, Users, Bell, FileText, Award, BookOpen, MessageCircle, Book, Target, Terminal, Calendar, HelpCircle, GraduationCap, KeyRound, BookCopy } from "lucide-react";
+import { LogOut, Settings, Users, Bell, FileText, Award, BookOpen, MessageCircle, Book, Target, Terminal, Calendar, HelpCircle, GraduationCap, KeyRound, BookCopy, User as UserProfileIcon } from "lucide-react";
 import { collection, onSnapshot, query, where, Timestamp, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -21,6 +21,8 @@ import NaanView from "@/components/views/naan-view";
 import ExtraCoursesView from "@/components/views/extra-courses-view";
 import StudyPlannerView from "@/components/views/study-planner-view";
 import QuizGeneratorView from "@/components/views/quiz-generator-view";
+import ProfileView from "@/components/views/profile-view";
+
 import AdminSetupView from "@/components/views/admin/setup-view";
 import AdminStudentsView from "@/components/views/admin/students-view";
 import AdminNotificationsView from "@/components/views/admin/notifications-view";
@@ -41,6 +43,7 @@ const studentViews: { [key: string]: React.ComponentType<any> } = {
   extra: ExtraCoursesView,
   planner: StudyPlannerView,
   quiz: QuizGeneratorView,
+  profile: ProfileView,
 };
 
 const adminViews: { [key: string]: React.ComponentType<any> } = {
@@ -65,6 +68,7 @@ const studentMenuItems = [
   { key: 'extra', label: 'Extra Courses', icon: BookOpen },
   { key: 'planner', label: 'Study Planner', icon: Calendar },
   { key: 'quiz', label: 'Quiz Generator', icon: HelpCircle },
+  { key: 'profile', label: 'My Profile', icon: UserProfileIcon },
 ];
 
 const adminMenuItems = [

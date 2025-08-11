@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { type User, type ChatMessage, type Syllabus } from "@/types";
 import { runAiTutor } from "@/app/actions";
 import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, orderBy, serverTimestamp, onSnapshot, doc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -16,7 +16,7 @@ import { Card } from "../ui/card";
 import { BookOpen } from "lucide-react";
 
 interface ChatViewProps {
-  user: User;
+  user: User & { id?: string }; // Student user will have an id
 }
 
 export default function ChatView({ user }: ChatViewProps) {
@@ -26,12 +26,12 @@ export default function ChatView({ user }: ChatViewProps) {
   const [syllabusContent, setSyllabusContent] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  // Fetch syllabus once on component mount
   useEffect(() => {
     const fetchSyllabus = async () => {
       try {
         const syllabusSnapshot = await getDocs(collection(db, "syllabus"));
         if (syllabusSnapshot.empty) {
-          console.log("Syllabus not found in Firestore.");
           setSyllabusContent("No syllabus data is available.");
           return;
         }
@@ -39,7 +39,6 @@ export default function ChatView({ user }: ChatViewProps) {
         syllabusSnapshot.forEach(doc => {
           syllabusData[doc.id] = doc.data();
         });
-        // Convert the structured syllabus into a string for the AI
         const syllabusString = JSON.stringify(syllabusData, null, 2);
         setSyllabusContent(syllabusString);
       } catch (error) {
@@ -49,6 +48,24 @@ export default function ChatView({ user }: ChatViewProps) {
     };
     fetchSyllabus();
   }, []);
+
+  // Subscribe to chat history
+  useEffect(() => {
+    if (!user.id) return;
+
+    const messagesRef = collection(db, "students", user.id, "chatHistory");
+    const q = query(messagesRef, orderBy("timestamp"));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const history: ChatMessage[] = snapshot.docs.map(doc => doc.data() as ChatMessage);
+      setMessages(history);
+    }, (error) => {
+      console.error("Error fetching chat history:", error);
+    });
+
+    return () => unsubscribe();
+
+  }, [user.id]);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -61,27 +78,36 @@ export default function ChatView({ user }: ChatViewProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading || !syllabusContent) return;
-
-    const userMessage: ChatMessage = { role: "user", parts: [{ text: input }] };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    if (!input.trim() || isLoading || !syllabusContent || !user.id) return;
+    
     setIsLoading(true);
+    const userMessage: ChatMessage = { role: "user", parts: [{ text: input }] };
+    const currentInput = input;
+    setInput("");
+
+    // Save user message to Firestore
+    const messagesRef = collection(db, "students", user.id, "chatHistory");
+    await addDoc(messagesRef, { ...userMessage, timestamp: serverTimestamp() });
 
     try {
+      const historyToPass = [...messages, userMessage];
       const aiResponse = await runAiTutor({
-        question: input,
+        question: currentInput,
         syllabus: syllabusContent,
         studentName: user.name,
+        history: historyToPass,
       });
       const assistantMessage: ChatMessage = { role: "model", parts: [{ text: aiResponse }] };
-      setMessages((prev) => [...prev, assistantMessage]);
+      // Save model response to Firestore
+      await addDoc(messagesRef, { ...assistantMessage, timestamp: serverTimestamp() });
+
     } catch (error) {
       const errorMessage: ChatMessage = {
         role: "model",
         parts: [{ text: "Sorry, I encountered an error. Please try again." }],
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      // Save error message to Firestore
+      await addDoc(messagesRef, { ...errorMessage, timestamp: serverTimestamp() });
     } finally {
       setIsLoading(false);
     }
@@ -143,9 +169,9 @@ export default function ChatView({ user }: ChatViewProps) {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything about your syllabus..."
               className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              disabled={isLoading || !syllabusContent}
+              disabled={isLoading || !syllabusContent || !user.id}
             />
-            <Button type="submit" disabled={isLoading || !syllabusContent}>
+            <Button type="submit" disabled={isLoading || !syllabusContent || !user.id}>
               <Send className="h-4 w-4" />
               <span className="sr-only">Send</span>
             </Button>
