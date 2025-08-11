@@ -62,14 +62,13 @@ export default function ChatView({ user }: ChatViewProps) {
       const convos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Conversation[];
       setConversations(convos);
       setIsHistoryLoading(false);
-      // If no conversation is active and conversations exist, select the first one.
-      // This happens on initial load.
-      if (!activeConversationId && convos.length > 0) {
-        setActiveConversationId(convos[0].id);
-      }
+      // This logic was faulty, removing it to allow new chats.
+      // if (!activeConversationId && convos.length > 0) {
+      //   setActiveConversationId(convos[0].id);
+      // }
     });
     return () => unsubscribe();
-  }, [user.id]);
+  }, [user.id, activeConversationId]);
 
   useEffect(() => {
     if (!user.id || !activeConversationId) {
@@ -166,8 +165,8 @@ export default function ChatView({ user }: ChatViewProps) {
   };
 
   return (
-    <div className="h-full flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-4xl h-full flex flex-col relative">
+    <div className="h-full flex flex-col p-4">
+      <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col relative">
           <div className="absolute top-0 right-0 z-10">
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
@@ -252,21 +251,23 @@ export default function ChatView({ user }: ChatViewProps) {
             )}
           </div>
         </ScrollArea>
-        <Card className="p-2 rounded-xl shadow-lg">
-          <form onSubmit={handleSubmit} className="flex items-center gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything about your syllabus..."
-              className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              disabled={isLoading || !syllabusContent || !user.id}
-            />
-            <Button type="submit" disabled={isLoading || !syllabusContent || !user.id}>
-              <Send className="h-4 w-4" />
-              <span className="sr-only">Send</span>
-            </Button>
-          </form>
-        </Card>
+        <div className="w-full max-w-4xl mx-auto">
+          <Card className="p-2 rounded-xl shadow-lg">
+            <form onSubmit={handleSubmit} className="flex items-center gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask anything about your syllabus..."
+                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                disabled={isLoading || !syllabusContent || !user.id}
+              />
+              <Button type="submit" disabled={isLoading || !syllabusContent || !user.id}>
+                <Send className="h-4 w-4" />
+                <span className="sr-only">Send</span>
+              </Button>
+            </form>
+          </Card>
+        </div>
       </div>
     </div>
   );
