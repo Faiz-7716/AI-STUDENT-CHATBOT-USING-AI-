@@ -58,8 +58,6 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239466A7' fill-opacity='0.04'%3E%3Cpath d='M30 30c0-9.94-8.06-18-18-18s-18 8.06-18 18c0 9.94 8.06 18 18 18s18-8.06 18-18zm-18 0c0-4.41-3.59-8-8-8s-8 3.59-8 8s3.59 8 8 8s8-3.59 8-8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    background-attachment: fixed;
   }
 }
 
@@ -86,4 +84,21 @@ body {
 }
 .prose ul > li::before {
     @apply bg-muted-foreground;
+}
+
+.animated-gradient {
+    background-size: 300% 300%;
+    animation: gradient-animation 18s ease infinite;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

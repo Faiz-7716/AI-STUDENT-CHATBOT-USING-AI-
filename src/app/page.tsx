@@ -4,14 +4,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, GraduationCap } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
   const [isStudentLogin, setIsStudentLogin] = useState(true);
@@ -74,7 +74,11 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8">
+    <main className={cn(
+      "flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8",
+      "bg-gradient-to-br from-primary/10 via-background to-accent/10 dark:from-primary/20 dark:via-background dark:to-accent/20",
+      "animated-gradient"
+    )}>
       <div className="text-center mb-8">
         <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
           TutorAI
