@@ -147,7 +147,7 @@ export function Dashboard() {
               <GraduationCap className="w-8 h-8 text-primary" />
               <div className="group-data-[collapsible=icon]:hidden">
                 <h2 className="font-bold text-lg">FAIZAI</h2>
-                <p className="text-xs text-muted-foreground">B.Sc. CS Assistant</p>
+                <p className="text-xs text-muted-foreground">Student Assistant</p>
               </div>
             </div>
           </SidebarHeader>
