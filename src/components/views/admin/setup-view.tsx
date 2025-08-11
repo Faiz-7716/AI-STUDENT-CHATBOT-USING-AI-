@@ -8,6 +8,18 @@ import { collection, addDoc, getDocs, limit, query, setDoc, doc, writeBatch } fr
 import { db } from "@/lib/firebase";
 import { Settings, Users, Book } from "lucide-react";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 // This initial data would typically be managed elsewhere, but is included here as per the user's provided script.
 const initialStudents = [
@@ -69,11 +81,6 @@ export default function AdminSetupView() {
 
   const handleBulkUploadStudents = async () => {
     setIsUploadingStudents(true);
-    if (!window.confirm(`This will add ${initialStudents.length} students. This should only be run once. Proceed?`)) {
-      setIsUploadingStudents(false);
-      return;
-    }
-    
     try {
       const studentsRef = collection(db, "students");
       const q = query(studentsRef, limit(1));
@@ -102,10 +109,6 @@ export default function AdminSetupView() {
 
   const handleBulkUploadSyllabus = async () => {
     setIsUploadingSyllabus(true);
-    if (!window.confirm("This will upload the entire syllabus. Any existing syllabus data will be overwritten. Proceed?")) {
-      setIsUploadingSyllabus(false);
-      return;
-    }
     try {
       const batch = writeBatch(db);
       Object.entries(syllabusData).forEach(([semesterId, data]) => {
@@ -136,9 +139,23 @@ export default function AdminSetupView() {
               <CardDescription>Adds the initial list of students to the database from the predefined list.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={handleBulkUploadStudents} disabled={isUploadingStudents}>
-                {isUploadingStudents ? "Uploading..." : "Run Student Upload"}
-              </Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                       <Button disabled={isUploadingStudents}>{isUploadingStudents ? "Uploading..." : "Run Student Upload"}</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will add {initialStudents.length} students. This should only be run once. Proceed?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleBulkUploadStudents}>Upload</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </CardContent>
           </Card>
           <Card className="bg-muted/30">
@@ -147,9 +164,23 @@ export default function AdminSetupView() {
               <CardDescription>Uploads the complete 6-semester syllabus to the database. This will overwrite existing data.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={handleBulkUploadSyllabus} disabled={isUploadingSyllabus}>
-                {isUploadingSyllabus ? "Uploading..." : "Run Syllabus Upload"}
-              </Button>
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                       <Button disabled={isUploadingSyllabus}>{isUploadingSyllabus ? "Uploading..." : "Run Syllabus Upload"}</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                           This will upload the entire syllabus. Any existing syllabus data will be overwritten. Proceed?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleBulkUploadSyllabus}>Upload</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </CardContent>
           </Card>
         </CardContent>
@@ -157,3 +188,5 @@ export default function AdminSetupView() {
     </div>
   );
 }
+
+    

@@ -40,7 +40,7 @@ export default function AdminSyllabusView() {
 
   useEffect(() => {
     fetchSyllabus();
-  }, [toast]);
+  }, []);
   
   const handleAddSemester = async (semesterName: string) => {
     if (!semesterName.trim() || syllabus?.[semesterName]) {
@@ -131,30 +131,34 @@ export default function AdminSyllabusView() {
                                 </AlertDialog>
                             </AccordionTrigger>
                             <AccordionContent className="p-2 space-y-4">
-                                {Object.entries(courses).map(([courseCode, course]) => (
-                                    <Card key={courseCode} className="bg-muted/40">
-                                        <CardHeader className="flex flex-row items-center justify-between">
-                                            <div className="space-y-1">
-                                                <CardTitle className="text-base">{courseCode}: {course.title}</CardTitle>
-                                                <CardDescription>{course.category}</CardDescription>
-                                            </div>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4"/></Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader><AlertDialogTitle>Delete {courseCode}?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the course '{course.title}'. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-                                                    <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteCourse(semesterName, courseCode)}>Delete</AlertDialogAction></AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </CardHeader>
-                                        <CardContent>
-                                            {course.units && <ul className="list-disc pl-5 text-sm">{(course.units).map((item, i) => <li key={i}>{item}</li>)}</ul>}
-                                            {course.exercises && <ul className="list-disc pl-5 text-sm">{(course.exercises).map((item, i) => <li key={i}>{item}</li>)}</ul>}
-                                            {course.options && <ul className="list-disc pl-5 text-sm">{(course.options).map((item, i) => <li key={i}>{item}</li>)}</ul>}
-                                        </CardContent>
-                                    </Card>
-                                ))}
+                                {Object.keys(courses).length > 0 ? (
+                                    Object.entries(courses).map(([courseCode, course]) => (
+                                        <Card key={courseCode} className="bg-muted/40">
+                                            <CardHeader className="flex flex-row items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <CardTitle className="text-base">{courseCode}: {course.title}</CardTitle>
+                                                    <CardDescription>{course.category}</CardDescription>
+                                                </div>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4"/></Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader><AlertDialogTitle>Delete {courseCode}?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the course '{course.title}'. This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+                                                        <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteCourse(semesterName, courseCode)}>Delete</AlertDialogAction></AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </CardHeader>
+                                            <CardContent>
+                                                {course.units && <ul className="list-disc pl-5 text-sm">{(course.units).map((item, i) => <li key={i}>{item}</li>)}</ul>}
+                                                {course.exercises && <ul className="list-disc pl-5 text-sm">{(course.exercises).map((item, i) => <li key={i}>{item}</li>)}</ul>}
+                                                {course.options && <ul className="list-disc pl-5 text-sm">{(course.options).map((item, i) => <li key={i}>{item}</li>)}</ul>}
+                                            </CardContent>
+                                        </Card>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-muted-foreground p-4 text-center">No courses added for this semester yet.</p>
+                                )}
                                 <AddCourseForm semesterName={semesterName} onAddCourse={handleAddCourse} />
                             </AccordionContent>
                         </AccordionItem>
@@ -263,3 +267,4 @@ function AddCourseForm({ semesterName, onAddCourse }: { semesterName: string, on
     );
 }
 
+    
