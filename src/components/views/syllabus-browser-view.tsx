@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { type Syllabus } from "@/types";
+import { type Syllabus, type User } from "@/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,9 @@ import { runAiTutor } from "@/app/actions";
 import { Bot, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-const SYLLABUS_CONTENT_STUB = "This is a placeholder for the full syllabus content which would be fetched and passed to the AI.";
-
-export default function SyllabusBrowserView({ user }: { user: any }) {
+export default function SyllabusBrowserView({ user }: { user: User }) {
   const [syllabus, setSyllabus] = useState<Syllabus | null>(null);
+  const [syllabusContent, setSyllabusContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [aiResponse, setAiResponse] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,11 +27,17 @@ export default function SyllabusBrowserView({ user }: { user: any }) {
     const fetchSyllabus = async () => {
       try {
         const syllabusSnapshot = await getDocs(collection(db, "syllabus"));
+         if (syllabusSnapshot.empty) {
+          console.log("Syllabus not found in Firestore.");
+          setIsLoading(false);
+          return;
+        }
         const syllabusData: Syllabus = {};
         syllabusSnapshot.forEach(doc => {
           syllabusData[doc.id] = doc.data();
         });
         setSyllabus(syllabusData);
+        setSyllabusContent(JSON.stringify(syllabusData, null, 2));
       } catch (error) {
         console.error("Error fetching syllabus:", error);
         toast({ variant: "destructive", title: "Error", description: "Could not fetch syllabus." });
@@ -43,13 +49,17 @@ export default function SyllabusBrowserView({ user }: { user: any }) {
   }, [toast]);
 
   const handlePromptClick = async (prompt: string, title: string) => {
+    if (!syllabusContent) {
+        toast({variant: 'destructive', title: 'Syllabus not loaded', description: 'Cannot get explanation without syllabus data.'});
+        return;
+    }
     setIsModalOpen(true);
     setIsAiLoading(true);
     setAiResponse("");
     try {
       const response = await runAiTutor({
         question: `Explain ${prompt} from ${title}`,
-        syllabus: SYLLABUS_CONTENT_STUB,
+        syllabus: syllabusContent,
         studentName: user.name,
       });
       setAiResponse(response);
@@ -82,7 +92,7 @@ export default function SyllabusBrowserView({ user }: { user: any }) {
         </CardContent></Card>
       ) : syllabus ? (
         <Accordion type="single" collapsible className="w-full">
-          {Object.entries(syllabus).sort().map(([semester, courses]) => (
+          {Object.entries(syllabus).sort((a, b) => a[0].localeCompare(b[0])).map(([semester, courses]) => (
             <AccordionItem key={semester} value={semester}>
               <AccordionTrigger className="text-lg font-semibold">{semester}</AccordionTrigger>
               <AccordionContent>
@@ -109,6 +119,12 @@ export default function SyllabusBrowserView({ user }: { user: any }) {
                             ))}
                           </div>
                         )}
+                         {course.options && (
+                          <div className="mt-4 space-y-2">
+                            <h4 className="font-semibold text-sm">Elective Options</h4>
+                             <p className="text-sm text-muted-foreground p-2">{course.options.join(' / ')}</p>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
@@ -118,7 +134,12 @@ export default function SyllabusBrowserView({ user }: { user: any }) {
           ))}
         </Accordion>
       ) : (
-        <p className="text-muted-foreground text-center py-8">Syllabus not available.</p>
+        <Card className="text-center p-8">
+            <CardTitle>Syllabus Not Available</CardTitle>
+            <CardDescription className="mt-2">
+                The syllabus data has not been loaded yet. An administrator needs to upload it from the 'Setup & Data' page.
+            </CardDescription>
+        </Card>
       )}
     </div>
   );

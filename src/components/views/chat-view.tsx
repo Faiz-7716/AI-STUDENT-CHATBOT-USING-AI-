@@ -1,8 +1,11 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { type User, type ChatMessage } from "@/types";
+import { type User, type ChatMessage, type Syllabus } from "@/types";
 import { runAiTutor } from "@/app/actions";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -16,13 +19,36 @@ interface ChatViewProps {
   user: User;
 }
 
-const SYLLABUS_CONTENT_STUB = "This is a placeholder for the full syllabus content which would be fetched and passed to the AI.";
-
 export default function ChatView({ user }: ChatViewProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [syllabusContent, setSyllabusContent] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchSyllabus = async () => {
+      try {
+        const syllabusSnapshot = await getDocs(collection(db, "syllabus"));
+        if (syllabusSnapshot.empty) {
+          console.log("Syllabus not found in Firestore.");
+          setSyllabusContent("No syllabus data is available.");
+          return;
+        }
+        const syllabusData: Syllabus = {};
+        syllabusSnapshot.forEach(doc => {
+          syllabusData[doc.id] = doc.data();
+        });
+        // Convert the structured syllabus into a string for the AI
+        const syllabusString = JSON.stringify(syllabusData, null, 2);
+        setSyllabusContent(syllabusString);
+      } catch (error) {
+        console.error("Error fetching syllabus:", error);
+        setSyllabusContent("Error fetching syllabus data.");
+      }
+    };
+    fetchSyllabus();
+  }, []);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -35,7 +61,7 @@ export default function ChatView({ user }: ChatViewProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !syllabusContent) return;
 
     const userMessage: ChatMessage = { role: "user", parts: [{ text: input }] };
     setMessages((prev) => [...prev, userMessage]);
@@ -45,7 +71,7 @@ export default function ChatView({ user }: ChatViewProps) {
     try {
       const aiResponse = await runAiTutor({
         question: input,
-        syllabus: SYLLABUS_CONTENT_STUB,
+        syllabus: syllabusContent,
         studentName: user.name,
       });
       const assistantMessage: ChatMessage = { role: "model", parts: [{ text: aiResponse }] };
@@ -117,9 +143,9 @@ export default function ChatView({ user }: ChatViewProps) {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything about your syllabus..."
               className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              disabled={isLoading}
+              disabled={isLoading || !syllabusContent}
             />
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || !syllabusContent}>
               <Send className="h-4 w-4" />
               <span className="sr-only">Send</span>
             </Button>
