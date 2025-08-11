@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -98,7 +99,7 @@ export default function LoginPage() {
                 <Input
                   id="roll"
                   type="text"
-                  placeholder="e.g., 31924U18001"
+                  placeholder="e.g., 21CS001"
                   value={roll}
                   onChange={(e) => setRoll(e.target.value)}
                   disabled={isLoading}
@@ -110,7 +111,7 @@ export default function LoginPage() {
                 <Input
                   id="code"
                   type="password"
-                  placeholder="e.g., CS25-701-AK"
+                  placeholder="e.g., Your unique code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   disabled={isLoading}
