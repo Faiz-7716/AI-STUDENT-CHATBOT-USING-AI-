@@ -2,21 +2,22 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { type User, type ChatMessage, type Syllabus } from "@/types";
+import { type User, type ChatMessage, type Syllabus, type Conversation } from "@/types";
 import { runAiTutor } from "@/app/actions";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, addDoc, query, orderBy, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { collection, getDocs, addDoc, query, orderBy, serverTimestamp, onSnapshot, limit, getDoc, doc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bot, Send, User as UserIcon } from "lucide-react";
+import { Bot, Send, User as UserIcon, MessageSquarePlus, History, PanelRightOpen } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { Card } from "../ui/card";
 import { BookOpen } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface ChatViewProps {
-  user: User & { id?: string }; // Student user will have an id
+  user: User & { id?: string };
 }
 
 export default function ChatView({ user }: ChatViewProps) {
@@ -24,9 +25,11 @@ export default function ChatView({ user }: ChatViewProps) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [syllabusContent, setSyllabusContent] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Fetch syllabus once on component mount
   useEffect(() => {
     const fetchSyllabus = async () => {
       try {
@@ -49,11 +52,28 @@ export default function ChatView({ user }: ChatViewProps) {
     fetchSyllabus();
   }, []);
 
-  // Subscribe to chat history
   useEffect(() => {
     if (!user.id) return;
+    const convosRef = collection(db, "students", user.id, "conversations");
+    const q = query(convosRef, orderBy("timestamp", "desc"));
 
-    const messagesRef = collection(db, "students", user.id, "chatHistory");
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const convos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Conversation[];
+      setConversations(convos);
+      setIsHistoryLoading(false);
+      if (!activeConversationId && convos.length > 0) {
+        setActiveConversationId(convos[0].id);
+      }
+    });
+    return () => unsubscribe();
+  }, [user.id, activeConversationId]);
+
+  useEffect(() => {
+    if (!user.id || !activeConversationId) {
+        setMessages([]);
+        return;
+    };
+    const messagesRef = collection(db, "students", user.id, "conversations", activeConversationId, "messages");
     const q = query(messagesRef, orderBy("timestamp"));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -64,8 +84,8 @@ export default function ChatView({ user }: ChatViewProps) {
     });
 
     return () => unsubscribe();
+  }, [user.id, activeConversationId]);
 
-  }, [user.id]);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -74,7 +94,12 @@ export default function ChatView({ user }: ChatViewProps) {
         behavior: "smooth",
       });
     }
-  }, [messages]);
+  }, [messages, isLoading]);
+
+  const handleNewConversation = () => {
+    setActiveConversationId(null);
+    setMessages([]);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,18 +109,25 @@ export default function ChatView({ user }: ChatViewProps) {
     const currentInput = input;
     setInput("");
 
-    const userMessage: ChatMessage = { role: "user", parts: [{ text: currentInput }] };
-    
-    // Save user message to Firestore
-    const messagesRef = collection(db, "students", user.id, "chatHistory");
-    await addDoc(messagesRef, { ...userMessage, timestamp: serverTimestamp() });
+    let currentConversationId = activeConversationId;
 
+    if (!currentConversationId) {
+      const convoRef = await addDoc(collection(db, "students", user.id, "conversations"), {
+        title: currentInput.substring(0, 40),
+        timestamp: serverTimestamp()
+      });
+      currentConversationId = convoRef.id;
+      setActiveConversationId(currentConversationId);
+    }
+    
+    const userMessage: ChatMessage = { role: "user", parts: [{ text: currentInput }] };
+    const messagesRef = collection(db, "students", user.id, "conversations", currentConversationId, "messages");
+    await addDoc(messagesRef, { ...userMessage, timestamp: serverTimestamp() });
+    
     try {
-      // The `onSnapshot` listener will update the `messages` state with the new user message.
-      // We pass the new, complete history to the AI.
       const historyToPass = [...messages, userMessage].map(msg => ({
         role: msg.role,
-        parts: msg.parts,
+        parts: msg.parts.map(p => ({text: p.text})),
       }));
 
       const aiResponse = await runAiTutor({
@@ -106,7 +138,6 @@ export default function ChatView({ user }: ChatViewProps) {
       });
 
       const assistantMessage: ChatMessage = { role: "model", parts: [{ text: aiResponse }] };
-      // Save model response to Firestore
       await addDoc(messagesRef, { ...assistantMessage, timestamp: serverTimestamp() });
 
     } catch (error) {
@@ -114,7 +145,6 @@ export default function ChatView({ user }: ChatViewProps) {
         role: "model",
         parts: [{ text: "Sorry, I encountered an error. Please try again." }],
       };
-      // Save error message to Firestore
       await addDoc(messagesRef, { ...errorMessage, timestamp: serverTimestamp() });
     } finally {
       setIsLoading(false);
@@ -123,7 +153,43 @@ export default function ChatView({ user }: ChatViewProps) {
 
   return (
     <div className="h-full flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-4xl h-full flex flex-col">
+      <div className="w-full max-w-4xl h-full flex flex-col relative">
+          <div className="absolute top-0 right-0 z-10">
+            <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <PanelRightOpen className="h-5 w-5"/>
+                        <span className="sr-only">Toggle Conversations History</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent className="w-[300px] sm:w-[400px] flex flex-col">
+                    <SheetHeader>
+                        <SheetTitle className="flex items-center gap-2"><History className="h-5 w-5"/> Conversations</SheetTitle>
+                    </SheetHeader>
+                    <Button variant="outline" className="w-full" onClick={handleNewConversation}>
+                       <MessageSquarePlus className="mr-2 h-4 w-4"/> New Chat
+                    </Button>
+                    <ScrollArea className="flex-1 -mx-6">
+                        <div className="px-6 py-2 space-y-1">
+                            {isHistoryLoading ? (
+                                Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-10 w-full"/>)
+                            ) : (
+                                conversations.map(convo => (
+                                    <Button 
+                                        key={convo.id} 
+                                        variant={activeConversationId === convo.id ? "secondary" : "ghost"}
+                                        className="w-full justify-start truncate"
+                                        onClick={() => setActiveConversationId(convo.id)}
+                                    >
+                                        {convo.title}
+                                    </Button>
+                                ))
+                            )}
+                        </div>
+                    </ScrollArea>
+                </SheetContent>
+            </Sheet>
+          </div>
         <ScrollArea className="flex-1 mb-4 pr-4" ref={scrollAreaRef}>
           <div className="space-y-6">
             {messages.length === 0 && !isLoading && (
@@ -132,7 +198,7 @@ export default function ChatView({ user }: ChatViewProps) {
                    <BookOpen className="h-10 w-10 text-primary" />
                 </div>
                 <h2 className="mt-6 text-2xl font-semibold">Hello, {user.name}!</h2>
-                <p className="text-muted-foreground">How can I help you with your studies today?</p>
+                <p className="text-muted-foreground">{activeConversationId ? "Continue your conversation." : "How can I help you with your studies today?"}</p>
               </div>
             )}
             {messages.map((message, index) => (

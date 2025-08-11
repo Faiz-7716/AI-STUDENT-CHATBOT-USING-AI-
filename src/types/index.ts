@@ -49,6 +49,13 @@ export interface ExtraCourse {
 export interface ChatMessage {
   role: "user" | "model";
   parts: { text: string }[];
+  timestamp?: Timestamp;
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  timestamp: Timestamp;
 }
 
 export interface SyllabusCourse {
