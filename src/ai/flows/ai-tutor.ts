@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -59,9 +60,9 @@ Syllabus Content: {{{syllabus}}}
 Conversation History:
 {{#each history}}
   {{#if (eq this.role "user")}}
-    Student: {{{this.parts.0.text}}}
+    Student: {{#each this.parts}}{{{this.text}}}{{/each}}
   {{else}}
-    Assistant: {{{this.parts.0.text}}}
+    Assistant: {{#each this.parts}}{{{this.text}}}{{/each}}
   {{/if}}
 {{/each}}
 {{/if}}
