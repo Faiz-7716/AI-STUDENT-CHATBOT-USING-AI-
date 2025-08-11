@@ -10,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {ChatMessage} from '@/types';
 
 const ChatMessageSchema = z.object({
   role: z.enum(['user', 'model']),
