@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { type User } from "@/types";
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -107,8 +107,7 @@ export function Dashboard() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen bg-background">
-        <Sidebar className="flex flex-col border-r w-72" collapsible="icon">
+        <Sidebar className="flex flex-col border-r" collapsible="icon">
           <SidebarHeader className="p-4 border-b">
             <div className="flex items-center gap-3">
               <GraduationCap className="w-8 h-8 text-primary" />
@@ -148,7 +147,7 @@ export function Dashboard() {
           </SidebarFooter>
         </Sidebar>
 
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <SidebarInset className="flex flex-col overflow-hidden">
           <header className="flex items-center justify-between p-4 border-b h-16">
             <h1 className="text-xl font-semibold">
               {menuItems.find(item => item.key === view)?.label}
@@ -164,8 +163,7 @@ export function Dashboard() {
           <div className="flex-1 overflow-y-auto bg-muted/20">
             {CurrentView && <CurrentView user={user} setView={setView} />}
           </div>
-        </main>
-      </div>
+        </SidebarInset>
     </SidebarProvider>
   );
 }
