@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -36,7 +37,7 @@ export default function AdminNotesView() {
 
   useEffect(() => {
     fetchNotes();
-  }, []);
+  }, [toast]);
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,10 +70,10 @@ export default function AdminNotesView() {
       <Card>
         <CardHeader><CardTitle>Add New Note</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={handleAddNote} className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
-            <div className="space-y-2"><Label htmlFor="new-title">Note Title</Label><Input id="new-title" value={newTitle} onChange={e => setNewTitle(e.target.value)} required disabled={isSubmitting}/></div>
-            <div className="space-y-2"><Label htmlFor="new-link">Google Drive Link</Label><Input id="new-link" type="url" value={newLink} onChange={e => setNewLink(e.target.value)} required disabled={isSubmitting}/></div>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Adding..." : "Add Note"}</Button>
+          <form onSubmit={handleAddNote} className="space-y-4 md:space-y-0 md:flex md:items-end md:gap-4">
+            <div className="space-y-2 flex-1"><Label htmlFor="new-title">Note Title</Label><Input id="new-title" value={newTitle} onChange={e => setNewTitle(e.target.value)} required disabled={isSubmitting}/></div>
+            <div className="space-y-2 flex-1"><Label htmlFor="new-link">Google Drive Link</Label><Input id="new-link" type="url" value={newLink} onChange={e => setNewLink(e.target.value)} required disabled={isSubmitting}/></div>
+            <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto">{isSubmitting ? "Adding..." : "Add Note"}</Button>
           </form>
         </CardContent>
       </Card>
@@ -81,15 +82,15 @@ export default function AdminNotesView() {
         <CardHeader><CardTitle>Existing Notes</CardTitle></CardHeader>
         <CardContent>
           <Table>
-            <TableHeader><TableRow><TableHead>Title</TableHead><TableHead>Link</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Title</TableHead><TableHead className="hidden sm:table-cell">Link</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow><TableCell colSpan={3} className="text-center">Loading...</TableCell></TableRow>
               ) : notes.length > 0 ? (
                 notes.map(note => (
                   <TableRow key={note.id}>
-                    <TableCell>{note.title}</TableCell>
-                    <TableCell><a href={note.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View Note</a></TableCell>
+                    <TableCell className="font-medium">{note.title}</TableCell>
+                    <TableCell className="hidden sm:table-cell"><a href={note.link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View Note</a></TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteNote(note.id)}><Trash2 className="h-4 w-4" /></Button>
                     </TableCell>

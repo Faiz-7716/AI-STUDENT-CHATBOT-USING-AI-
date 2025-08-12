@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -77,7 +78,7 @@ export default function StudyPlannerView() {
   };
 
   return (
-    <div className="p-4 sm:p-6 grid lg:grid-cols-12 gap-6">
+    <div className="p-4 sm:p-6 grid lg:grid-cols-12 gap-6 items-start">
       <div className="lg:col-span-4 xl:col-span-3">
         <Card className="sticky top-6">
           <CardHeader>
@@ -85,7 +86,7 @@ export default function StudyPlannerView() {
             <CardDescription>Select difficult subjects to generate a 7-day plan.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-80 pr-4">
+            <ScrollArea className="h-64 lg:h-80 pr-4">
               <div className="space-y-4">
                 {isLoading
                   ? Array.from({ length: 10 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)
@@ -111,7 +112,7 @@ export default function StudyPlannerView() {
       </div>
 
       <div className="lg:col-span-8 xl:col-span-9">
-         <Card className="h-full">
+         <Card>
            <CardHeader>
              <CardTitle>Your 7-Day Study Plan</CardTitle>
              <CardDescription>Here is a structured plan based on your selected subjects.</CardDescription>
@@ -129,7 +130,7 @@ export default function StudyPlannerView() {
                 </div>
              )}
             {plan.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {plan.map((dayPlan) => (
                       <Card key={dayPlan.day} className="p-4">
                           <h3 className="font-bold text-primary">{dayPlan.day}</h3>

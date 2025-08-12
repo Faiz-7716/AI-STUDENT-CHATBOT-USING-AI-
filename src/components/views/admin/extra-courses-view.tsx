@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -63,7 +64,7 @@ export default function AdminExtraCoursesView() {
         <CardHeader><CardTitle>Add New Extra Course</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleAddCourse} className="space-y-4">
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label htmlFor="title">Course Title</Label><Input id="title" value={newCourse.title} onChange={handleInputChange} required disabled={isSubmitting}/></div>
               <div className="space-y-2"><Label htmlFor="link">Resource Link</Label><Input id="link" type="url" value={newCourse.link} onChange={handleInputChange} required disabled={isSubmitting}/></div>
             </div>
@@ -77,13 +78,13 @@ export default function AdminExtraCoursesView() {
         <CardHeader><CardTitle>Existing Courses</CardTitle></CardHeader>
         <CardContent>
           <Table>
-            <TableHeader><TableRow><TableHead>Title</TableHead><TableHead>Description</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Title</TableHead><TableHead className="hidden md:table-cell">Description</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
             <TableBody>
               {isLoading ? (<TableRow><TableCell colSpan={3} className="text-center">Loading...</TableCell></TableRow>) 
               : courses.length > 0 ? (courses.map(course => (
                   <TableRow key={course.id}>
-                    <TableCell>{course.title}</TableCell>
-                    <TableCell>{course.description}</TableCell>
+                    <TableCell className="font-medium">{course.title}</TableCell>
+                    <TableCell className="hidden md:table-cell">{course.description}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteCourse(course.id)}><Trash2 className="h-4 w-4" /></Button>
                     </TableCell>

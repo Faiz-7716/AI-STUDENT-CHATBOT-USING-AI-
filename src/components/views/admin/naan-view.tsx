@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -66,17 +67,19 @@ export default function AdminNaanView() {
       <Card>
         <CardHeader><CardTitle>Add New Naan Mudhalvan Course</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={handleAddCourse} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-end">
-            <div className="space-y-2 lg:col-span-2"><Label htmlFor="title">Course Title</Label><Input id="title" value={newCourse.title} onChange={handleInputChange} required disabled={isSubmitting}/></div>
-            <div className="space-y-2"><Label htmlFor="provider">Provider</Label><Input id="provider" value={newCourse.provider} onChange={handleInputChange} required disabled={isSubmitting}/></div>
-            <div className="space-y-2"><Label>Semester</Label>
-              <Select value={newCourse.semester} onValueChange={handleSelectChange} required disabled={isSubmitting}>
-                  <SelectTrigger><SelectValue/></SelectTrigger>
-                  <SelectContent>{Array.from({length: 6}, (_, i) => <SelectItem key={i+1} value={(i+1).toString()}>{i+1}</SelectItem>)}</SelectContent>
-              </Select>
+          <form onSubmit={handleAddCourse} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2 lg:col-span-2"><Label htmlFor="title">Course Title</Label><Input id="title" value={newCourse.title} onChange={handleInputChange} required disabled={isSubmitting}/></div>
+              <div className="space-y-2"><Label htmlFor="provider">Provider</Label><Input id="provider" value={newCourse.provider} onChange={handleInputChange} required disabled={isSubmitting}/></div>
+              <div className="space-y-2"><Label>Semester</Label>
+                <Select value={newCourse.semester} onValueChange={handleSelectChange} required disabled={isSubmitting}>
+                    <SelectTrigger><SelectValue/></SelectTrigger>
+                    <SelectContent>{Array.from({length: 6}, (_, i) => <SelectItem key={i+1} value={(i+1).toString()}>{i+1}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2 lg:col-span-4"><Label htmlFor="link">Course Link</Label><Input id="link" type="url" value={newCourse.link} onChange={handleInputChange} required disabled={isSubmitting}/></div>
             </div>
-            <div className="space-y-2 lg:col-span-2"><Label htmlFor="link">Course Link</Label><Input id="link" type="url" value={newCourse.link} onChange={handleInputChange} required disabled={isSubmitting}/></div>
-            <Button type="submit" disabled={isSubmitting} className="w-full lg:w-auto lg:col-start-5">{isSubmitting ? "Adding..." : "Add Course"}</Button>
+            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">{isSubmitting ? "Adding..." : "Add Course"}</Button>
           </form>
         </CardContent>
       </Card>
@@ -85,14 +88,14 @@ export default function AdminNaanView() {
         <CardHeader><CardTitle>Existing Courses</CardTitle></CardHeader>
         <CardContent>
           <Table>
-            <TableHeader><TableRow><TableHead>Semester</TableHead><TableHead>Title</TableHead><TableHead>Provider</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Sem</TableHead><TableHead>Title</TableHead><TableHead className="hidden sm:table-cell">Provider</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
             <TableBody>
               {isLoading ? (<TableRow><TableCell colSpan={4} className="text-center">Loading...</TableCell></TableRow>) 
               : courses.length > 0 ? (courses.map(course => (
                   <TableRow key={course.id}>
                     <TableCell>{course.semester}</TableCell>
-                    <TableCell>{course.title}</TableCell>
-                    <TableCell>{course.provider}</TableCell>
+                    <TableCell className="font-medium">{course.title}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{course.provider}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteCourse(course.id)}><Trash2 className="h-4 w-4" /></Button>
                     </TableCell>

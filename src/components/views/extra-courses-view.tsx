@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -33,7 +34,7 @@ export default function ExtraCoursesView() {
 
   return (
     <div className="p-4 sm:p-6">
-       <div className="grid gap-4 md:grid-cols-2">
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {isLoading
           ? Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="p-6">

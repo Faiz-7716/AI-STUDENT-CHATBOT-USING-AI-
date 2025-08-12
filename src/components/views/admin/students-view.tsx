@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useReducer } from "react";
@@ -111,22 +112,24 @@ export default function AdminStudentsView({ setView }: { setView: (view: string)
           <CardTitle>Add New Student</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleAddStudent} className="grid sm:grid-cols-3 md:grid-cols-4 gap-4 items-end">
-            <div className="space-y-2"><Label htmlFor="new-roll">Roll Number</Label><Input id="new-roll" value={newRoll} onChange={e => setNewRoll(e.target.value)} required disabled={isSubmitting}/></div>
-            <div className="space-y-2"><Label htmlFor="new-name">Name</Label><Input id="new-name" value={newName} onChange={e => setNewName(e.target.value)} required disabled={isSubmitting}/></div>
-            <div className="space-y-2"><Label htmlFor="new-code">Access Code</Label><Input id="new-code" value={newCode} onChange={e => setNewCode(e.target.value)} required disabled={isSubmitting}/></div>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Adding..." : "Add Student"}</Button>
+          <form onSubmit={handleAddStudent} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2"><Label htmlFor="new-roll">Roll Number</Label><Input id="new-roll" value={newRoll} onChange={e => setNewRoll(e.target.value)} required disabled={isSubmitting}/></div>
+                <div className="space-y-2"><Label htmlFor="new-name">Name</Label><Input id="new-name" value={newName} onChange={e => setNewName(e.target.value)} required disabled={isSubmitting}/></div>
+                <div className="space-y-2"><Label htmlFor="new-code">Access Code</Label><Input id="new-code" value={newCode} onChange={e => setNewCode(e.target.value)} required disabled={isSubmitting}/></div>
+            </div>
+            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">{isSubmitting ? "Adding..." : "Add Student"}</Button>
           </form>
         </CardContent>
       </Card>
       
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <CardTitle>Student List</CardTitle>
             <CardDescription>A list of all students currently in the system.</CardDescription>
           </div>
-          <Button variant="outline" onClick={() => setView('admin-access-codes')}><KeyRound className="mr-2 h-4 w-4" /> View All Access Codes</Button>
+          <Button variant="outline" onClick={() => setView('admin-access-codes')} className="w-full sm:w-auto"><KeyRound className="mr-2 h-4 w-4" /> View All Access Codes</Button>
         </CardHeader>
         <CardContent>
           <Table>
@@ -134,7 +137,7 @@ export default function AdminStudentsView({ setView }: { setView: (view: string)
               <TableRow>
                 <TableHead>Roll Number</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Access Code</TableHead>
+                <TableHead className="hidden md:table-cell">Access Code</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -144,9 +147,9 @@ export default function AdminStudentsView({ setView }: { setView: (view: string)
               ) : state.students.length > 0 ? (
                 state.students.map(student => (
                   <TableRow key={student.id}>
-                    <TableCell>{student.roll}</TableCell>
+                    <TableCell className="font-medium">{student.roll}</TableCell>
                     <TableCell>{student.name}</TableCell>
-                    <TableCell><code>{student.code}</code></TableCell>
+                    <TableCell className="hidden md:table-cell"><code>{student.code}</code></TableCell>
                     <TableCell className="text-right">
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
