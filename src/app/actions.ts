@@ -6,16 +6,25 @@ import { generateQuiz, type GenerateQuizInput } from "@/ai/flows/quiz-generator"
 import { studyPlannerGenerator, type StudyPlannerInput } from "@/ai/flows/study-planner-generator";
 import { examStrategyGenerator, type ExamStrategyInput } from "@/ai/flows/exam-strategy-generator";
 import { db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { QuizResult } from "@/types";
 
 export async function runAiTutor(input: AiTutorInput) {
   const { answer } = await aiTutor(input);
   return answer;
 }
 
-export async function runCodeSolutionGenerator(input: CodeSolutionGeneratorInput) {
-  const { codeSolution, explanation } = await codeSolutionGenerator(input);
-  return { codeSolution, explanation };
+export async function runCodeSolutionGenerator(input: CodeSolutionGeneratorInput, studentId: string) {
+  const result = await codeSolutionGenerator(input);
+  if (studentId) {
+    const historyRef = collection(db, "students", studentId, "labSolutions");
+    await addDoc(historyRef, {
+      ...input,
+      ...result,
+      timestamp: serverTimestamp(),
+    });
+  }
+  return result;
 }
 
 export async function runGenerateQuiz(input: GenerateQuizInput) {
@@ -23,14 +32,38 @@ export async function runGenerateQuiz(input: GenerateQuizInput) {
   return quiz;
 }
 
-export async function runStudyPlannerGenerator(input: StudyPlannerInput) {
-  const { dailyPlan } = await studyPlannerGenerator(input);
-  return dailyPlan;
+export async function runStudyPlannerGenerator(input: StudyPlannerInput, studentId: string) {
+  const result = await studyPlannerGenerator(input);
+  if (studentId) {
+    const historyRef = collection(db, "students", studentId, "studyPlanners");
+    await addDoc(historyRef, {
+      ...input,
+      ...result,
+      timestamp: serverTimestamp(),
+    });
+  }
+  return result.dailyPlan;
 }
 
-export async function runExamStrategyGenerator(input: ExamStrategyInput) {
-  const { likelyQuestions, revisionNotes, modelAnswer } = await examStrategyGenerator(input);
-  return { likelyQuestions, revisionNotes, modelAnswer };
+export async function runExamStrategyGenerator(input: ExamStrategyInput, studentId: string) {
+  const result = await examStrategyGenerator(input);
+  if (studentId) {
+    const historyRef = collection(db, "students", studentId, "examStrategies");
+    await addDoc(historyRef, {
+      ...input,
+      ...result,
+      timestamp: serverTimestamp(),
+    });
+  }
+  return result;
+}
+
+export async function saveQuizResult(result: Omit<QuizResult, 'id' | 'timestamp'>, studentId: string) {
+    const historyRef = collection(db, "students", studentId, "quizResults");
+    await addDoc(historyRef, {
+      ...result,
+      timestamp: serverTimestamp(),
+    });
 }
 
 export async function updateStudentProfile(studentId: string, data: { name?: string; email?: string; phone?: string; }) {
