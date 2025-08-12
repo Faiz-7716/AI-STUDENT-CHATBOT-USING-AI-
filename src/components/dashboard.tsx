@@ -1,15 +1,17 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { type User } from "@/types";
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, SidebarMenuBadge } from "@/components/ui/sidebar";
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, SidebarMenuBadge, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LogOut, Settings, Users, Bell, FileText, Award, BookOpen, MessageCircle, Book, Target, Terminal, Calendar, HelpCircle, GraduationCap, KeyRound, BookCopy, User as UserProfileIcon } from "lucide-react";
+import { LogOut, Settings, Users, Bell, FileText, Award, BookOpen, MessageCircle, Book, Target, Terminal, Calendar, HelpCircle, GraduationCap, KeyRound, BookCopy, User as UserProfileIcon, PanelLeft } from "lucide-react";
 import { collection, onSnapshot, query, where, Timestamp, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import ChatView from "@/components/views/chat-view";
 import NotificationsView from "@/components/views/notifications-view";
@@ -87,6 +89,7 @@ export function Dashboard() {
   const [view, setView] = useState("");
   const [notificationCount, setNotificationCount] = useState(0);
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem("user");
@@ -190,9 +193,12 @@ export function Dashboard() {
 
         <SidebarInset className="flex flex-col overflow-hidden">
           <header className="flex items-center justify-between p-4 border-b h-16">
-            <h1 className="text-xl font-semibold">
-              {menuItems.find(item => item.key === view)?.label}
-            </h1>
+            <div className="flex items-center gap-2">
+              {isMobile && <SidebarTrigger><PanelLeft /></SidebarTrigger>}
+              <h1 className="text-xl font-semibold">
+                {menuItems.find(item => item.key === view)?.label}
+              </h1>
+            </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
               <Button variant="outline" size="sm" onClick={handleLogout}>
