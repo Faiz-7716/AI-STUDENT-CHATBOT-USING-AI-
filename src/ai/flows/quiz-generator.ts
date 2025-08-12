@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -29,7 +30,17 @@ const prompt = ai.definePrompt({
   name: 'quizGeneratorPrompt',
   input: {schema: GenerateQuizInputSchema},
   output: {schema: GenerateQuizOutputSchema},
-  prompt: `Act as a quiz master. Create a 15-question multiple-choice quiz about '{{{subject}}}' based on the syllabus. For each question, provide exactly three options (A, B, C). After all the questions, provide a separate answer key in the format: 1. A, 2. C, etc. Format the output clearly.`,
+  prompt: `You are a quiz master. Create a 15-question multiple-choice quiz about '{{{subject}}}' based on the syllabus.
+For each question, provide exactly three options, formatted like this:
+A) Option A
+B) Option B
+C) Option C
+
+After all 15 questions, provide a separate answer key section that looks exactly like this, including the header:
+Answer Key:
+1. A, 2. C, 3. B, etc.
+
+Ensure the output is clean and follows this structure precisely.`,
 });
 
 const generateQuizFlow = ai.defineFlow(

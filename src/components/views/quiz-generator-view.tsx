@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -33,50 +34,60 @@ const historyChartConfig = {
 const parseQuizText = (text: string): ParsedQuiz => {
     const questions: ParsedQuiz['questions'] = [];
     const answerKey: ParsedQuiz['answerKey'] = {};
-  
+
     const lines = text.split('\n').filter(line => line.trim() !== '');
     let currentQuestion: any = null;
-  
+
     const questionRegex = /^\d+\.\s(.+)/;
     const optionRegex = /^[A-C]\)\s(.+)/;
     const answerKeyHeaderRegex = /Answer Key:/i;
-    const answerKeyRegex = /(\d+)\.\s([A-C])/g;
-  
+    const answerKeyRegex = /(\d+)\.\s*([A-C])/g;
+
     let readingAnswers = false;
-  
+
     for (const line of lines) {
-      if (answerKeyHeaderRegex.test(line)) {
-        readingAnswers = true;
-        continue;
-      }
-  
-      if (readingAnswers) {
-        let match;
-        while ((match = answerKeyRegex.exec(line)) !== null) {
-          answerKey[parseInt(match[1])] = match[2];
+        if (answerKeyHeaderRegex.test(line)) {
+            readingAnswers = true;
+            continue;
         }
-      } else {
-        const questionMatch = line.match(questionRegex);
-        if (questionMatch) {
-          if (currentQuestion) questions.push(currentQuestion);
-          currentQuestion = { question: questionMatch[1].trim(), options: {} };
+
+        if (readingAnswers) {
+            let match;
+            while ((match = answerKeyRegex.exec(line)) !== null) {
+                answerKey[parseInt(match[1])] = match[2];
+            }
         } else {
-          const optionMatch = line.match(optionRegex);
-          if (optionMatch && currentQuestion) {
-            const key = line.substring(0, 1);
-            currentQuestion.options[key] = optionMatch[1].trim();
-          }
+            const questionMatch = line.match(questionRegex);
+            if (questionMatch) {
+                if (currentQuestion) {
+                    questions.push(currentQuestion);
+                }
+                currentQuestion = { question: questionMatch[1].trim(), options: {} };
+            } else {
+                const optionMatch = line.match(optionRegex);
+                if (optionMatch && currentQuestion) {
+                    const key = line.substring(0, 1) as 'A' | 'B' | 'C';
+                    currentQuestion.options[key] = optionMatch[1].trim();
+                }
+            }
         }
-      }
     }
-    if (currentQuestion) questions.push(currentQuestion);
-  
+
+    if (currentQuestion) {
+        questions.push(currentQuestion);
+    }
+
+    // Assign the correct answer to each question object
     questions.forEach((q, index) => {
-        q.answer = answerKey[index + 1];
-    })
-  
+        const questionNumber = index + 1;
+        if (answerKey[questionNumber]) {
+            q.answer = answerKey[questionNumber];
+        }
+    });
+
     return { questions, answerKey };
 };
+
 
 export default function QuizGeneratorView({ user }: { user: User & { id: string } }) {
   const [subjects, setSubjects] = useState<string[]>([]);
@@ -239,7 +250,7 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
               {quiz.questions.map((q, index) => (
                 <div key={index}>
                     <p className="font-medium mb-2 text-sm">{index + 1}. {q.question}</p>
-                    <RadioGroup onValueChange={(value) => handleAnswerChange(index, value)} className="text-sm">
+                    <RadioGroup onValueChange={(value) => handleAnswerChange(index, value)} className="text-sm space-y-1">
                         {Object.entries(q.options).map(([key, value]) => (
                             <div key={key} className="flex items-center space-x-2">
                                 <RadioGroupItem value={key} id={`q${index}-${key}`} />
