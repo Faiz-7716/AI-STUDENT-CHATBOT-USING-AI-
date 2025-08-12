@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { runGenerateQuiz, saveQuizResult } from "@/app/actions";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, onSnapshot, query, orderBy, limit } from "firebase/firestore";
+import { collection, getDocs, onSnapshot, query, orderBy } from "firebase/firestore";
 import { type Syllabus, type User, type ParsedQuiz, type QuizResult } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,14 +13,21 @@ import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart";
-import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { History, BarChart2 } from "lucide-react";
+import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+import { History, CheckCircle, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "../ui/badge";
+
+const PASS_PERCENTAGE = 75;
 
 const chartConfig = {
   correct: { label: "Correct", color: "hsl(var(--primary))" },
   incorrect: { label: "Incorrect", color: "hsl(var(--destructive))" },
+} satisfies ChartConfig;
+
+const historyChartConfig = {
+    passed: { label: "Passed", color: "hsl(var(--primary))" },
+    failed: { label: "Failed", color: "hsl(var(--destructive))" },
 } satisfies ChartConfig;
 
 const parseQuizText = (text: string): ParsedQuiz => {
@@ -31,9 +38,9 @@ const parseQuizText = (text: string): ParsedQuiz => {
     let currentQuestion: any = null;
   
     const questionRegex = /^\d+\.\s(.+)/;
-    const optionRegex = /^[A-D]\)\s(.+)/;
+    const optionRegex = /^[A-C]\)\s(.+)/;
     const answerKeyHeaderRegex = /Answer Key:/i;
-    const answerKeyRegex = /(\d+)\.\s([A-D])/g;
+    const answerKeyRegex = /(\d+)\.\s([A-C])/g;
   
     let readingAnswers = false;
   
@@ -109,8 +116,7 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
     if (!user.id) return;
     const q = query(
       collection(db, "students", user.id, "quizResults"),
-      orderBy("timestamp", "desc"),
-      limit(10)
+      orderBy("timestamp", "desc")
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as QuizResult[];
@@ -176,10 +182,19 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
     }
   }
   
-  const chartData = useMemo(() => ([
+  const singleQuizChartData = useMemo(() => ([
     { name: "Correct", value: result?.correctAnswers ?? 0, fill: "var(--color-correct)" },
     { name: "Incorrect", value: result?.incorrectAnswers ?? 0, fill: "var(--color-incorrect)" },
   ]), [result]);
+
+  const historyStats = useMemo(() => {
+    const passed = history.filter(h => h.percentage >= PASS_PERCENTAGE).length;
+    const failed = history.length - passed;
+    return [
+      { name: 'Passed', value: passed, fill: 'var(--color-passed)' },
+      { name: 'Failed', value: failed, fill: 'var(--color-failed)' }
+    ];
+  }, [history]);
 
   return (
     <div className="p-4 sm:p-6 grid lg:grid-cols-12 gap-6 items-start">
@@ -187,7 +202,7 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
         <Card>
           <CardHeader>
             <CardTitle>Quiz Generator</CardTitle>
-            <CardDescription>Select a subject to generate a 5-question quiz.</CardDescription>
+            <CardDescription>Select a subject to generate a 15-question quiz.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row items-end gap-4">
             <div className="flex-1 w-full">
@@ -196,12 +211,12 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
                 <Skeleton className="h-10 w-full" />
               ) : (
                 <Select value={selectedSubject} onValueChange={setSelectedSubject} disabled={isGenerating}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-sm">
                     <SelectValue placeholder="Select a subject" />
                   </SelectTrigger>
                   <SelectContent>
                     {subjects.map(subject => (
-                      <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                      <SelectItem key={subject} value={subject} className="text-sm">{subject}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -223,12 +238,12 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
             <CardContent className="space-y-6">
               {quiz.questions.map((q, index) => (
                 <div key={index}>
-                    <p className="font-medium mb-2">{index + 1}. {q.question}</p>
-                    <RadioGroup onValueChange={(value) => handleAnswerChange(index, value)}>
+                    <p className="font-medium mb-2 text-sm">{index + 1}. {q.question}</p>
+                    <RadioGroup onValueChange={(value) => handleAnswerChange(index, value)} className="text-sm">
                         {Object.entries(q.options).map(([key, value]) => (
                             <div key={key} className="flex items-center space-x-2">
                                 <RadioGroupItem value={key} id={`q${index}-${key}`} />
-                                <Label htmlFor={`q${index}-${key}`}>{value}</Label>
+                                <Label htmlFor={`q${index}-${key}`} className="font-normal">{value}</Label>
                             </div>
                         ))}
                     </RadioGroup>
@@ -243,15 +258,15 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
             <Card>
                 <CardHeader>
                     <CardTitle>Quiz Results for {result.subject}</CardTitle>
-                    <CardDescription>You scored {result.score} out of {result.total}.</CardDescription>
+                    <CardDescription>You scored {result.score} out of {result.total}. Passing score is {PASS_PERCENTAGE}%.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                     <div className="h-52">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-                                <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={5}>
-                                     {chartData.map((entry, index) => (
+                                <Pie data={singleQuizChartData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={5}>
+                                     {singleQuizChartData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
                                      ))}
                                 </Pie>
@@ -260,10 +275,10 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
                     </div>
                      <div className="h-52">
                         <ResponsiveContainer width="100%" height="100%">
-                             <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 10 }}>
+                             <BarChart data={singleQuizChartData} layout="vertical" margin={{ left: 10, right: 10 }}>
                                 <ChartTooltip content={<ChartTooltipContent />} />
                                 <Bar dataKey="value" radius={5}>
-                                {chartData.map((entry) => (
+                                {singleQuizChartData.map((entry) => (
                                     <Cell key={entry.name} fill={entry.fill} />
                                 ))}
                                 </Bar>
@@ -278,7 +293,7 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
        <div className="lg:col-span-4 xl:col-span-3">
          <Card className="sticky top-6">
            <CardHeader>
-             <CardTitle className="flex items-center gap-2"><History className="h-5 w-5" /> Recent Quizzes</CardTitle>
+             <CardTitle className="flex items-center gap-2"><History className="h-5 w-5" /> Quiz History</CardTitle>
            </CardHeader>
            <CardContent>
              {isHistoryLoading ? (
@@ -286,16 +301,43 @@ export default function QuizGeneratorView({ user }: { user: User & { id: string 
                   {Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
                 </div>
              ) : history.length > 0 ? (
-                <div className="space-y-2">
-                  {history.map(item => (
-                    <div key={item.id} className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
-                       <div>
-                        <p className="font-semibold">{item.subject}</p>
-                        <p className="text-xs text-muted-foreground">{format(item.timestamp.toDate(), 'PP p')}</p>
-                       </div>
-                       <Badge variant={item.percentage >= 50 ? "default" : "destructive"}>{Math.round(item.percentage)}%</Badge>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  <div className="h-32">
+                    <ChartContainer config={historyChartConfig}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                                <Legend content={({ payload }) => (
+                                    <div className="flex gap-4 justify-center text-xs">
+                                        {payload?.map((item: any) => (
+                                            <div key={item.value} className="flex items-center gap-1">
+                                            <div className="w-2 h-2 rounded-full" style={{backgroundColor: item.color}}></div>
+                                            <span>{item.value} ({item.payload.value})</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}/>
+                                <Pie data={historyStats} dataKey="value" nameKey="name" innerRadius={40}>
+                                    {historyStats.map((entry) => (
+                                        <Cell key={entry.name} fill={entry.fill} />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                  </div>
+
+                  <div className="max-h-64 overflow-y-auto pr-2 space-y-2">
+                    {history.map(item => (
+                        <div key={item.id} className="flex justify-between items-center p-2 rounded-lg bg-muted/50 text-sm">
+                        <div>
+                            <p className="font-semibold truncate max-w-[150px] sm:max-w-[200px]" title={item.subject}>{item.subject}</p>
+                            <p className="text-xs text-muted-foreground">{format(item.timestamp.toDate(), 'PP p')}</p>
+                        </div>
+                        <Badge variant={item.percentage >= PASS_PERCENTAGE ? "default" : "destructive"}>{Math.round(item.percentage)}%</Badge>
+                        </div>
+                    ))}
+                  </div>
                 </div>
              ) : (
                 <p className="text-sm text-muted-foreground text-center p-4">No quiz history yet.</p>

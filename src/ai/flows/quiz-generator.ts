@@ -29,7 +29,7 @@ const prompt = ai.definePrompt({
   name: 'quizGeneratorPrompt',
   input: {schema: GenerateQuizInputSchema},
   output: {schema: GenerateQuizOutputSchema},
-  prompt: `Act as a quiz master. Create a 5-question multiple-choice quiz about '{{{subject}}}' based on the syllabus. For each question, provide four options (A, B, C, D). After the questions, provide a separate answer key in the format: 1. A, 2. C, etc. Format the output clearly.`,
+  prompt: `Act as a quiz master. Create a 15-question multiple-choice quiz about '{{{subject}}}' based on the syllabus. For each question, provide exactly three options (A, B, C). After all the questions, provide a separate answer key in the format: 1. A, 2. C, etc. Format the output clearly.`,
 });
 
 const generateQuizFlow = ai.defineFlow(
