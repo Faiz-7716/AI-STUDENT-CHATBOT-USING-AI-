@@ -98,7 +98,7 @@ export function Dashboard() {
       setUser(parsedUser);
       setView(parsedUser.isAdmin ? 'admin-setup' : 'chat');
     } else {
-      router.push("/");
+      router.push("/login");
     }
   }, [router]);
 
@@ -132,7 +132,7 @@ export function Dashboard() {
   const handleLogout = () => {
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("lastCheckedNotifications");
-    router.push("/");
+    router.push("/login");
   };
 
   if (!user) {
@@ -148,69 +148,69 @@ export function Dashboard() {
 
   return (
     <SidebarProvider>
-        <Sidebar className="flex flex-col border-r" collapsible="icon">
-          <SidebarHeader className="p-4 border-b">
-            <div className="flex items-center gap-3">
-              <GraduationCap className="w-8 h-8 text-primary" />
-              <div className="group-data-[collapsible=icon]:hidden">
-                <h2 className="font-bold text-lg">FAIZAI</h2>
-                <p className="text-xs text-muted-foreground">Student Assistant</p>
-              </div>
+      <Sidebar className="flex flex-col border-r" collapsible="icon">
+        <SidebarHeader className="p-4 border-b">
+          <div className="flex items-center gap-3">
+            <GraduationCap className="w-8 h-8 text-primary" />
+            <div className="group-data-[collapsible=icon]:hidden">
+              <h2 className="font-bold text-lg">FAIZAI</h2>
+              <p className="text-xs text-muted-foreground">Student Assistant</p>
             </div>
-          </SidebarHeader>
-          <SidebarContent className="flex-1 overflow-y-auto">
-            <SidebarMenu className="p-2">
-              {menuItems.map(item => (
-                <SidebarMenuItem key={item.key}>
-                  <SidebarMenuButton
-                    onClick={() => handleSetView(item.key)}
-                    isActive={view === item.key}
-                    tooltip={item.label}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span>{item.label}</span>
-                     {item.key === 'notifications' && notificationCount > 0 && (
-                        <SidebarMenuBadge>{notificationCount}</SidebarMenuBadge>
-                     )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter className="p-4 border-t">
-             <div className="flex items-center gap-3">
-                <Avatar>
-                  <AvatarImage src={`https://placehold.co/40x40.png?text=${user.name.charAt(0)}`} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="group-data-[collapsible=icon]:hidden">
-                  <p className="font-semibold text-sm">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">{user.isAdmin ? 'Administrator' : 'Student'}</p>
-                </div>
-              </div>
-          </SidebarFooter>
-        </Sidebar>
-
-        <SidebarInset className="flex flex-col overflow-hidden">
-          <header className="flex items-center justify-between p-4 border-b h-16">
-            <div className="flex items-center gap-2">
-              {isMobile && <SidebarTrigger><PanelLeft /></SidebarTrigger>}
-              <h1 className="text-xl font-semibold">
-                {menuItems.find(item => item.key === view)?.label}
-              </h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
-            </div>
-          </header>
-          <div className="flex-1 overflow-y-auto bg-muted/20">
-            {CurrentView && <CurrentView user={user} setView={setView} />}
           </div>
-        </SidebarInset>
+        </SidebarHeader>
+        <SidebarContent className="flex-1 overflow-y-auto">
+          <SidebarMenu className="p-2">
+            {menuItems.map(item => (
+              <SidebarMenuItem key={item.key}>
+                <SidebarMenuButton
+                  onClick={() => handleSetView(item.key)}
+                  isActive={view === item.key}
+                  tooltip={item.label}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                    {item.key === 'notifications' && notificationCount > 0 && (
+                      <SidebarMenuBadge>{notificationCount}</SidebarMenuBadge>
+                    )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarContent>
+        <SidebarFooter className="p-4 border-t">
+            <div className="flex items-center gap-3">
+              <Avatar>
+                <AvatarImage src={`https://placehold.co/40x40.png?text=${user.name.charAt(0)}`} />
+                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div className="group-data-[collapsible=icon]:hidden">
+                <p className="font-semibold text-sm">{user.name}</p>
+                <p className="text-xs text-muted-foreground">{user.isAdmin ? 'Administrator' : 'Student'}</p>
+              </div>
+            </div>
+        </SidebarFooter>
+      </Sidebar>
+
+      <SidebarInset className="flex flex-col overflow-hidden">
+        <header className="flex items-center justify-between p-4 border-b h-16 bg-background">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="md:hidden" />
+            <h1 className="text-xl font-semibold">
+              {menuItems.find(item => item.key === view)?.label}
+            </h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
+        </header>
+        <div className="flex-1 overflow-y-auto bg-muted/20">
+          {CurrentView && <CurrentView user={user} setView={setView} />}
+        </div>
+      </SidebarInset>
     </SidebarProvider>
   );
 }
